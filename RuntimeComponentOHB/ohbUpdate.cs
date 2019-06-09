@@ -1,5 +1,4 @@
-﻿using FluentFTP;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,10 +7,11 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+
+using FluentFTP;
+
 using Windows.ApplicationModel.Background;
 using Windows.Storage;
-
-
 
 namespace RuntimeComponentOHB
 {
