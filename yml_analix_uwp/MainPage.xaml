@@ -14,7 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100*"/>
+            <ColumnDefinition Width="150*"/>
             <ColumnDefinition Width="200*"/>
             <!--<ColumnDefinition Height="50*"/>-->
         </Grid.ColumnDefinitions>
@@ -36,6 +36,22 @@
                     Margin="10,5,10,5"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"/>
+            <Button x:Name="btnClear" 
+                    Height="50" 
+                    Content="Clear log" 
+                    Tapped="BtnClear_Tapped" 
+                    Background="#7F9A04FF" 
+                    Margin="10,5,10,5"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"/>
+            <Button x:Name="btnLog" 
+                    Height="50" 
+                    Content="View log" 
+                    Background="Chocolate" 
+                    Margin="10,5,10,5"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center" Tapped="BtnLog_Tapped"/>
+
         </StackPanel>
         <StackPanel Margin="10,50,10,10" Grid.Row="0" Grid.Column="1">
             <TimePicker x:Name="timePiker"
@@ -55,7 +71,7 @@
             <Button x:Name="btnSetBackgroundTask" 
                     Height="50" 
                     Content="Set background task"
-                    Background="DarkOrange"
+                    Background="DarkBlue"
                     Margin="10,5,10,5"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
@@ -78,7 +94,7 @@
                  HorizontalAlignment="Stretch"
                  UseLayoutRounding="False"
                  VerticalAlignment="Stretch"
-                 d:LayoutRounding="Auto">
+                 d:LayoutRounding="Auto" TextWrapping="Wrap">
             <TextBox.RenderTransform>
                 <CompositeTransform SkewX="0.518" TranslateX="1.591"/>
             </TextBox.RenderTransform>

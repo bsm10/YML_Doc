@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using YML_Doc.ViewModel;
@@ -17,7 +20,7 @@ namespace YML_Doc
         Progress<string> progress;
 
         //DispatcherTimer dispatcherTimer;
-        DispatcherTimer dispatcherTimer2;
+        //DispatcherTimer dispatcherTimer2;
         DateTime startTime, endTime;
 
         string taskName = "Update_OneHomeBeauty";
@@ -38,10 +41,10 @@ namespace YML_Doc
             //dispatcherTimer.Interval = new TimeSpan(0, (int)numericUpDown1.Value, 0);
             //dispatcherTimer.Start();
 
-            dispatcherTimer2 = new DispatcherTimer();
-            dispatcherTimer2.Tick += dispatcherTimer_Tick2;
-            dispatcherTimer2.Interval = new TimeSpan(0, 0, 1);
-            dispatcherTimer2.Start();
+            //dispatcherTimer2 = new DispatcherTimer();
+            //dispatcherTimer2.Tick += dispatcherTimer_Tick2;
+            //dispatcherTimer2.Interval = new TimeSpan(0, 0, 1);
+            //dispatcherTimer2.Start();
             startTime = DateTime.Now;
             endTime = startTime.Add(timePiker.Time);
 
@@ -62,12 +65,12 @@ namespace YML_Doc
 
         }
 
-        private async void dispatcherTimer_TickAsync(object sender, object e)
-        {
-            await YML_prog.UpdateOneHomeBeauty(progress);
-            startTime = DateTime.Now;
-            endTime = startTime.Add(timePiker.Time);
-        }
+        //private async void dispatcherTimer_TickAsync(object sender, object e)
+        //{
+        //    await YML_prog.UpdateOneHomeBeauty(progress);
+        //    startTime = DateTime.Now;
+        //    endTime = startTime.Add(timePiker.Time);
+        //}
 
         private async void BtnUpdate_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
@@ -188,7 +191,13 @@ namespace YML_Doc
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            await CreateLogFileAsync();
             await GetInfo();
+        }
+
+        private void BtnClear_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            txtStatus.Text = "";
         }
 
         private void SetBackgroundTask(double minutes)
@@ -198,8 +207,67 @@ namespace YML_Doc
             BackgroundTaskRegistration bk = RegisterBackgroundTask(taskEntryPoint, taskName, trigger, null);
             if (bk != null)
             {
-                txtStatus.Text+="Background Task " + taskName + " registered!\r\n";
+                txtStatus.Text += "Background Task " + taskName + " registered!\r\n";
                 txtStatus.Text += "time trigger set at " + minutes.ToString() + "minutes\r\n";
+            }
+        }
+
+        private void BtnLog_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            GetLogAsync();
+        }
+
+        StorageFile logFile;
+        string logFileName = "update.log";
+        StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+
+        private async void GetLogAsync()
+        {
+            try
+            {
+
+                // получаем файл
+                logFile = await localFolder.GetFileAsync(logFileName);
+                // читаем файл
+                string text = await FileIO.ReadTextAsync(logFile);
+                txtStatus.Text += text + "\r\n";
+
+            }
+            catch(FileNotFoundException)
+            {
+                return;
+            }
+        }
+        private async Task CreateLogFileAsync()
+        {
+            try
+            {
+                StorageFile file = await localFolder.GetFileAsync(logFileName);
+            }
+            catch(FileNotFoundException)
+            {
+                txtStatus.Text += "File not found, - creating..." + "\r\n";
+                logFile = await localFolder.CreateFileAsync(logFileName, CreationCollisionOption.ReplaceExisting);
+                txtStatus.Text += "File was creation - " + logFile.Path + "\r\n";
+            }
+            catch(Exception e)
+            {
+                txtStatus.Text += e.Message + "\r\n";
+                txtStatus.Text += e.HelpLink + "\r\n";
+            }
+
+        }
+        private async Task LogAsync(string text)
+        {
+            try
+            {
+                // получаем файл
+                StorageFile logFile = await localFolder.GetFileAsync(logFileName);
+                await FileIO.AppendTextAsync(logFile, DateTime.Now.ToString("yyyy-MM-dd HH:mm - ") + text + "\r\n");
+            }
+            finally
+            {
+
             }
         }
 

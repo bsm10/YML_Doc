@@ -1,6 +1,7 @@
 ﻿using FluentFTP;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -9,6 +10,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Windows.ApplicationModel.Background;
 using Windows.Storage;
+
+
 
 namespace RuntimeComponentOHB
 {
@@ -41,6 +44,7 @@ namespace RuntimeComponentOHB
             _deferral = taskInstance.GetDeferral();
             try
             {
+                
                 await UpdateOneHomeBeautyAsync();
             }
             finally
@@ -76,31 +80,38 @@ namespace RuntimeComponentOHB
                 //client.UploadFile(xmlFile.Path, "/www/files/onehomebeauty.xml");
                 await client.ConnectAsync();
                 await client.UploadFileAsync(xmlFile.Path, "/www/files/onehomebeauty.xml");
-
+                await LogAsync("Upload - ok!");
                 //progress?.Report("File Uploaded! " + DateTime.Now.ToString());
             }
-            //catch (Exception ex)
-            //{
-            //    //progress.Report(ex.ToString());
-            //}
+            catch (Exception ex)
+            {
+                await LogAsync(ex.Message);
+            }
             finally
             {
-
+                
             }
 
         }
 
         private static async Task SaveXml()
         {
-            // получаем локальную папку
-            StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-            // создаем файл
-            xmlFile = await localFolder.CreateFileAsync(file,
-                                                CreationCollisionOption.ReplaceExisting);
-            // запись в файл
-            await FileIO.WriteTextAsync(xmlFile, shopTree.ToString());
-            //FileInfo fi = new FileInfo(xmlFile.Path);
-            //await new Windows.UI.Popups.MessageDialog("Файл создан и сохранен " + fi.FullName).ShowAsync();
+            try
+            {
+                // получаем локальную папку
+                StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+                // создаем файл
+                xmlFile = await localFolder.CreateFileAsync(file,
+                                                    CreationCollisionOption.ReplaceExisting);
+                // запись в файл
+                await FileIO.WriteTextAsync(xmlFile, shopTree.ToString());
+                FileInfo fi = new FileInfo(xmlFile.Path);
+                await LogAsync(xmlFile.Name + " - " + fi.Length.FileSizeToString());
+            }
+            catch(Exception e)
+            {
+                await LogAsync(e.Message);
+            }
         }
 
         private static async Task LoadShopAsync(string url_shop)
@@ -130,10 +141,12 @@ namespace RuntimeComponentOHB
             }
             catch (XmlException xmlEx)
             {
+                await LogAsync(xmlEx.Message);
                 //MessageBox.Show(xmlEx.Message);
             }
             catch (Exception ex)
             {
+                await LogAsync(ex.Message);
                 //MessageBox.Show(ex.Message);
             }
             //return null;
@@ -141,24 +154,49 @@ namespace RuntimeComponentOHB
 
         private static async Task GetShopsAsync()
         {
-            //загружаем список магазинов
-            XDocument xdoc = XDocument.Load("shops-yml.xml");
-            int countshops = xdoc.Element("shops-yml").Elements().Count();
-            string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-            //строим структуру основного файла
-            shopTree =
-                new XElement(yml_catalog, new XAttribute(date, time_update),
-                    new XElement(shop,
-                        new XElement(categories),
-                        new XElement(offers)));
-            //добавляем в корень категории и товары
-            foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
+            try
             {
-                await LoadShopAsync(addresxml.Value);
+                //загружаем список магазинов
+                XDocument xdoc = XDocument.Load("shops-yml.xml");
+                int countshops = xdoc.Element("shops-yml").Elements().Count();
+                string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                //строим структуру основного файла
+                shopTree =
+                    new XElement(yml_catalog, new XAttribute(date, time_update),
+                        new XElement(shop,
+                            new XElement(categories),
+                            new XElement(offers)));
+                //добавляем в корень категории и товары
+                foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
+                {
+                    await LoadShopAsync(addresxml.Value);
+                }
+                shopXML = new XDocument();
+                shopXML.Add(shopTree);
             }
-            shopXML = new XDocument();
-            shopXML.Add(shopTree);
+            catch(Exception e)
+            {
+                await LogAsync(e.Message);
+            }
+        }
+
+        private static async Task LogAsync(string text)
+        {
+            try
+            {
+                // получаем локальную папку
+                StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+                string filePath = "update.log";
+                // получаем файл
+                StorageFile logFile = await localFolder.GetFileAsync(filePath);
+                await FileIO.AppendTextAsync(logFile, DateTime.Now.ToString("yyyy-MM-dd HH:mm - ") + text + "\r\n");
+            }
+            finally
+            {
+                
+            }
         }
 
     }
 }
+
