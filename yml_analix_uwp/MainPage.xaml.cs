@@ -1,15 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using static CoreOHB.Helpers;
+using static CoreOHB.CoreOHB;
+using System;
 using System.Threading.Tasks;
-
 using Windows.ApplicationModel.Background;
-using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-
 using YML_Doc.ViewModel;
-
-using YMLUpload;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -56,15 +52,15 @@ namespace YML_Doc
         TimeSpan ts;
         private void dispatcherTimer_Tick2(object sender, object e)
         {
-            if (endTime > DateTime.Now)
-            {
-                ts = endTime - DateTime.Now;
-                txt1.Text = "До обновления осталось - " + ts.ToString(@"hh\:mm\:ss");
-            }
-            else
-            {
-                txt1.Text = "До обновления осталось - 0";
-            }
+            //if (endTime > DateTime.Now)
+            //{
+            //    ts = endTime - DateTime.Now;
+            //    txt1.Text = "До обновления осталось - " + ts.ToString(@"hh\:mm\:ss");
+            //}
+            //else
+            //{
+            //    txt1.Text = "До обновления осталось - 0";
+            //}
 
         }
 
@@ -77,7 +73,7 @@ namespace YML_Doc
 
         private async void BtnUpdate_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            await YML_prog.UpdateOneHomeBeauty(progress);
+            await UpdateOneHomeBeautyAsync();
         }
 
 
@@ -88,16 +84,18 @@ namespace YML_Doc
 
         }
 
-        private async System.Threading.Tasks.Task GetInfo()
+        private async Task GetInfo()
         {
             bkTask = CheckExistTask(taskName);
             if (bkTask != null)
             {
-                txtStatus.Text += "Background Task " + taskName + " is worked...\r\n";
+                
+                txt1.Text = "Background Task " + taskName + " is worked...\r\n";
             }
-            else txtStatus.Text += "Background Task " + taskName + " is not worked!\r\n";
+            else txt1.Text = "Background Task " + taskName + " is not worked!\r\n";
 
-            await YML_prog.GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+            ToastNotifications.ShowToast("One Home Beauty", txt1.Text, "", "");
+            //await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
         }
 
         private void TimePiker_TimeChanged(object sender, TimePickerValueChangedEventArgs e)
@@ -117,7 +115,6 @@ namespace YML_Doc
         {
             SetBackgroundTask(timePiker.Time.TotalMinutes);
         }
-
 
         //
         // Register a background task with the specified taskEntryPoint, name, trigger,
@@ -189,12 +186,11 @@ namespace YML_Doc
             {
                 txtStatus.Text += "Background Task " + taskName + " is null! \r\n";
             }
-            
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            await CreateLogFileAsync();
+            await Files.CreateLogFileAsync();
             await GetInfo();
         }
 
@@ -215,63 +211,10 @@ namespace YML_Doc
             }
         }
 
-        private void BtnLog_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        private async void BtnLog_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            GetLogAsync();
-        }
-
-        StorageFile logFile;
-        string logFileName = "update.log";
-        StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-
-        private async void GetLogAsync()
-        {
-            try
-            {
-
-                // получаем файл
-                logFile = await localFolder.GetFileAsync(logFileName);
-                // читаем файл
-                string text = await FileIO.ReadTextAsync(logFile);
-                txtStatus.Text += text + "\r\n";
-
-            }
-            catch(FileNotFoundException)
-            {
-                return;
-            }
-        }
-        private async Task CreateLogFileAsync()
-        {
-            try
-            {
-                StorageFile file = await localFolder.GetFileAsync(logFileName);
-            }
-            catch(FileNotFoundException)
-            {
-                txtStatus.Text += "File not found, - creating..." + "\r\n";
-                logFile = await localFolder.CreateFileAsync(logFileName, CreationCollisionOption.ReplaceExisting);
-                txtStatus.Text += "File was creation - " + logFile.Path + "\r\n";
-            }
-            catch(Exception e)
-            {
-                txtStatus.Text += e.Message + "\r\n";
-                txtStatus.Text += e.HelpLink + "\r\n";
-            }
-
-        }
-        private async Task LogAsync(string text)
-        {
-            try
-            {
-                // получаем файл
-                StorageFile logFile = await localFolder.GetFileAsync(logFileName);
-                await FileIO.AppendTextAsync(logFile, DateTime.Now.ToString("yyyy-MM-dd HH:mm - ") + text + "\r\n");
-            }
-            finally
-            {
-
-            }
+            txtStatus.Text += await Files.GetLogFileTextAsync();
+           // GetLogAsync();
         }
 
     }
