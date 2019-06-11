@@ -8,6 +8,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -95,6 +96,8 @@ namespace YML_Doc
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Сохранить состояние приложения и остановить все фоновые операции
+            //ApplicationData.Current.LocalSettings.Values["showtoast"] = MainPage.toggleToast.IsOn;
+            //ApplicationData.Current.LocalSettings.Values["timeupdate"] = MainPage.timePiker.Time;
             deferral.Complete();
         }
     }

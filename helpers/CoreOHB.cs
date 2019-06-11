@@ -18,7 +18,8 @@ namespace CoreOHB
 {
     public static class CoreOHB
     {
-        private static readonly string file = @"onehomebeauty.xml";
+        static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+        private static readonly string file = @"\DataFiles\onehomebeauty.xml";
 
         static readonly XName yml_catalog = "yml_catalog";
         static readonly XName shop = "shop";
@@ -53,7 +54,12 @@ namespace CoreOHB
                 //client.UploadFile(xmlFile.Path, "/www/files/onehomebeauty.xml");
                 await client.ConnectAsync();
                 await client.UploadFileAsync(xmlFile.Path, "/www/files/onehomebeauty.xml");
-                ToastNotifications.ShowToast("One Home Beauty", DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " - Updated onehomebeauty.xml", "", "");
+                if((bool)localSettings.Values["showtoast"]==true)
+                {
+                    ToastNotifications.ShowToast("One Home Beauty", DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " - Updated onehomebeauty.xml");
+                }
+                
+                await LogAsync("uploaded!");
             }
             catch (Exception ex)
             {
@@ -117,18 +123,18 @@ namespace CoreOHB
             }
             catch (Exception ex)
             {
-                await Files.LogAsync(ex.Message);
+                await LogAsync(ex.Message);
                 //MessageBox.Show(ex.Message);
             }
             //return null;
         }
 
-        private static async Task GetShopsAsync()
+        private static async Task GetShopsAsync(IProgress<string> progress)
         {
             try
             {
                 //загружаем список магазинов
-                XDocument xdoc = XDocument.Load("shops-yml.xml");
+                XDocument xdoc = XDocument.Load(@"DataFiles/shops-yml.xml");
                 int countshops = xdoc.Element("shops-yml").Elements().Count();
                 string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
                 //строим структуру основного файла
@@ -140,7 +146,9 @@ namespace CoreOHB
                 //добавляем в корень категории и товары
                 foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
                 {
+                    progress?.Report("Loading " + addresxml.Value + "...");
                     await LoadShopAsync(addresxml.Value);
+                    progress?.Report("Done!");
                 }
                 shopXML = new XDocument();
                 shopXML.Add(shopTree);
@@ -151,9 +159,27 @@ namespace CoreOHB
             }
         }
 
-        public static async Task UpdateOneHomeBeautyAsync()
+        public static async Task GetInfoShopAsync(string shopUrl, IProgress<string> progress)
         {
-            await GetShopsAsync();
+            progress.Report("Читаю " + shopUrl + "...");
+            XDocument xCatalog;
+            using (var httpclient = new HttpClient())
+            {
+                var response = await httpclient.GetAsync(shopUrl);
+                xCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
+            }
+
+            //string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+            progress.Report("Всего категорий - " + xCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements().Count()
+                           + "; товаров - " + xCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements().Count());
+
+            progress.Report("Дата обновления - " + xCatalog.Element(yml_catalog).Attribute(date).Value);
+
+        }
+
+        public static async Task UpdateOneHomeBeautyAsync(IProgress<string> progress = null)
+        {
+            await GetShopsAsync(progress);
             await SaveXml();
             await UploadShopAsync();
         }

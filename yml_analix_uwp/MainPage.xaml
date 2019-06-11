@@ -72,16 +72,7 @@
         </PivotItem>
         <PivotItem Header="Background task">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150*"/>
-                    <ColumnDefinition Width="200*"/>
-                    <!--<ColumnDefinition Height="50*"/>-->
-                </Grid.ColumnDefinitions>
-                <StackPanel Margin="10,50,10,10" Grid.Row="0" Grid.ColumnSpan="2">
+                <StackPanel Margin="10,10,10,10" Grid.Row="0" Grid.ColumnSpan="2">
                     <TimePicker x:Name="timePiker"
                         ClockIdentifier="24HourClock"
                         Header="Time to update"
@@ -89,38 +80,41 @@
                         Margin="10,5,10,5"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" />
-                    <Button x:Name="btnSetBackgroundTask" 
-                    Height="50" 
-                    Content="Set background task"
-                    Background="DarkBlue"
-                    Margin="10,5,10,5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    Tapped="BtnSetBackgroundTask_Tapped"/>
-                    <Button x:Name="btnUnregBackgroundTask"
-                    Height="50"
-                    Content="Unreg background task"
-                    Background="Fuchsia"
-                    Margin="10,5,10,5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    Tapped="BtnUnregBackgroundTask_Tapped"/>
-                    <TextBlock x:Name="txt1"
-                       Height="26"
-                       Text="TextBlock"
-                       Margin="10,5,10,5"
-                       TextWrapping="Wrap"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Stretch" MaxLines="9"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" 
+                                   Text="Enable background task"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left" 
+                                   Margin="10,5,10,5" />
+                        <ToggleSwitch x:Name="toggleTask"
+                                      Grid.Row="0" Grid.Column="1"
+                                      AutomationProperties.Name="task ToggleSwitch"
+                                      Margin="10,10,10,10" LostFocus="ToggleTask_LostFocus" Toggled="ToggleTask_Toggled" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Show toast" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,5,10,5" />
+                        <ToggleSwitch x:Name="toggleToast"
+                                      Grid.Row="1" Grid.Column="1"
+                                      AutomationProperties.Name="toast ToggleSwitch"
+                                      Margin="10,10,10,10" LostFocus="ToggleToast_LostFocus"/>
+                    </Grid>
 
                 </StackPanel>
             </Grid>
         </PivotItem>
+
         <PivotItem Header="Shops">
             <TextBlock Text="flagged emails go here." />
         </PivotItem>
         <PivotItem Header="Service">
-            <TextBlock Text="urgent emails go here." />
+
         </PivotItem>
     </Pivot>
 </Page>

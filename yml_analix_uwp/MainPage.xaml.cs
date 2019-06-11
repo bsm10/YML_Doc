@@ -1,11 +1,13 @@
 ﻿using static CoreOHB.Helpers;
 using static CoreOHB.CoreOHB;
+using static CoreOHB.Helpers.Files;
 using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using YML_Doc.ViewModel;
+using Windows.Storage;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -35,7 +37,7 @@ namespace YML_Doc
             //  DispatcherTimer setup
             //dispatcherTimer = new DispatcherTimer();
             //dispatcherTimer.Tick += dispatcherTimer_TickAsync;
-            timePiker.Time = new TimeSpan(4, 0, 0);
+            //timePiker.Time = new TimeSpan(4, 0, 0);
             //dispatcherTimer.Interval = timePiker.Time;
             //dispatcherTimer.Interval = new TimeSpan(0, (int)numericUpDown1.Value, 0);
             //dispatcherTimer.Start();
@@ -46,7 +48,7 @@ namespace YML_Doc
             //dispatcherTimer2.Start();
             startTime = DateTime.Now;
             endTime = startTime.Add(timePiker.Time);
-
+            RestoreSettimgs();
         }
 
         TimeSpan ts;
@@ -73,29 +75,14 @@ namespace YML_Doc
 
         private async void BtnUpdate_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            await UpdateOneHomeBeautyAsync();
+            await UpdateOneHomeBeautyAsync(progress);
+            await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress); 
         }
 
 
         private async void BtnGetInfo_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            //await YMLUpload.YML_prog.LoadShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
-            await GetInfo();
-
-        }
-
-        private async Task GetInfo()
-        {
-            bkTask = CheckExistTask(taskName);
-            if (bkTask != null)
-            {
-                
-                txt1.Text = "Background Task " + taskName + " is worked...\r\n";
-            }
-            else txt1.Text = "Background Task " + taskName + " is not worked!\r\n";
-
-            ToastNotifications.ShowToast("One Home Beauty", txt1.Text, "", "");
-            //await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+            await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
         }
 
         private void TimePiker_TimeChanged(object sender, TimePickerValueChangedEventArgs e)
@@ -108,6 +95,8 @@ namespace YML_Doc
                 startTime = DateTime.Now;
                 endTime = startTime.Add(timePiker.Time);
             }
+
+            localSettings.Values["timeupdate"] = timePiker.Time;
         }
 
 
@@ -190,8 +179,8 @@ namespace YML_Doc
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            await Files.CreateLogFileAsync();
-            await GetInfo();
+            await CreateLogFileAsync();
+            await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
         }
 
         private void BtnClear_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
@@ -213,8 +202,72 @@ namespace YML_Doc
 
         private async void BtnLog_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            txtStatus.Text += await Files.GetLogFileTextAsync();
+            txtStatus.Text += await GetLogFileTextAsync();
            // GetLogAsync();
+        }
+
+        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+        private void ToggleToast_LostFocus(object sender, RoutedEventArgs e)
+        {
+            localSettings.Values["showtoast"] = toggleToast.IsOn;
+        }
+
+        private void ToggleTask_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //localSettings.Values["enable_task"] = toggleToast.IsOn;
+        }
+
+        private void ToggleTask_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch t = (ToggleSwitch)e.OriginalSource;
+            BackgroundTaskRegistration bk = CheckExistTask(taskName);
+            if (t.IsOn & bk==null)
+            {
+                SetBackgroundTask(timePiker.Time.TotalMinutes);
+            }
+            else if(!t.IsOn & bk!=null)
+            {
+                bk.Unregister(true);
+            }
+        }
+
+        private void RestoreSettimgs()
+        {
+            Object tog = localSettings.Values["showtoast"];
+            if (tog == null)
+            {
+                toggleToast.IsOn = false;
+            }
+            else
+            {
+                toggleToast.IsOn = (bool)tog;
+            }
+            Object time = localSettings.Values["timeupdate"];
+            if (time != null)
+            {
+                timePiker.Time = (TimeSpan)time;
+            }
+            else
+            {
+                timePiker.Time = new TimeSpan(4, 0, 0);
+            }
+            bkTask = CheckExistTask(taskName);
+            if (bkTask != null)
+            {
+                toggleTask.IsOn = true;
+            }
+            else toggleTask.IsOn = false;
+
+            //Object task = localSettings.Values["enable_task"];
+            //if (task != null)
+            //{
+            //    toggleTask.IsOn = (bool)task;
+            //}
+            //else
+            //{
+            //    toggleTask.IsOn = false;
+            //}
+
         }
 
     }
