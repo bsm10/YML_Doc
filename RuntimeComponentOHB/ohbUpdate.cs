@@ -1,5 +1,6 @@
-﻿using Windows.ApplicationModel.Background;
-using static CoreOHB.CoreOHB;
+﻿using static CoreOHB.CoreOHB;
+
+using Windows.ApplicationModel.Background;
 
 namespace RuntimeComponentOHB
 {

@@ -1,13 +1,16 @@
-﻿using static CoreOHB.Helpers;
-using static CoreOHB.CoreOHB;
-using static CoreOHB.Helpers.Files;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+
+using static CoreOHB.CoreOHB;
+using static CoreOHB.Helpers;
+using static CoreOHB.Helpers.Files;
+
 using Windows.ApplicationModel.Background;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+
 using YML_Doc.ViewModel;
-using Windows.Storage;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -75,14 +78,30 @@ namespace YML_Doc
 
         private async void BtnUpdate_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            await UpdateOneHomeBeautyAsync(progress);
-            await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress); 
+            try
+            {
+                await UpdateOneHomeBeautyAsync(progress);
+                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+            }
+            catch (Exception exc)
+            {
+                ToastNotifications.ShowToast("GetInfoShopAsync", exc.Message);
+            }
         }
 
 
         private async void BtnGetInfo_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+            try
+            {
+                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+            }
+            catch (Exception exc)
+            {
+                ToastNotifications.ShowToast("BtnGetInfo_Tapped", exc.Message);
+            }
+
+            
         }
 
         private void TimePiker_TimeChanged(object sender, TimePickerValueChangedEventArgs e)
@@ -102,7 +121,16 @@ namespace YML_Doc
 
         private void BtnSetBackgroundTask_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            SetBackgroundTask(timePiker.Time.TotalMinutes);
+            try
+            {
+                SetBackgroundTask(timePiker.Time.TotalMinutes);
+            }
+            catch (Exception exc)
+            {
+                ToastNotifications.ShowToast("BtnSetBackgroundTask_Tapped", exc.Message);
+            }
+
+           
         }
 
         //
@@ -179,8 +207,15 @@ namespace YML_Doc
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            await CreateLogFileAsync();
-            await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+            try
+            {
+                await CreateLogFileAsync();
+                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+            }
+            catch (Exception exc)
+            {
+                ToastNotifications.ShowToast("Page_Loaded", exc.Message);
+            }
         }
 
         private void BtnClear_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)

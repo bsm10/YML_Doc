@@ -1,6 +1,4 @@
-﻿using FluentFTP;
-using Microsoft.Toolkit.Uwp.Notifications;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,10 +7,16 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Windows.Storage;
-using Windows.UI.Notifications;
+
+using FluentFTP;
+
+using Microsoft.Toolkit.Uwp.Notifications;
+
 using static CoreOHB.Helpers;
 using static CoreOHB.Helpers.Files;
+
+using Windows.Storage;
+using Windows.UI.Notifications;
 
 namespace CoreOHB
 {
@@ -161,19 +165,26 @@ namespace CoreOHB
 
         public static async Task GetInfoShopAsync(string shopUrl, IProgress<string> progress)
         {
-            progress.Report("Читаю " + shopUrl + "...");
-            XDocument xCatalog;
-            using (var httpclient = new HttpClient())
+            try
             {
-                var response = await httpclient.GetAsync(shopUrl);
-                xCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
+                progress.Report("Читаю " + shopUrl + "...");
+                XDocument xCatalog;
+                using (var httpclient = new HttpClient())
+                {
+                    var response = await httpclient.GetAsync(shopUrl);
+                    xCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
+                }
+
+                //string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                progress.Report("Всего категорий - " + xCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements().Count()
+                               + "; товаров - " + xCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements().Count());
+
+                progress.Report("Дата обновления - " + xCatalog.Element(yml_catalog).Attribute(date).Value);
             }
-
-            //string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-            progress.Report("Всего категорий - " + xCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements().Count()
-                           + "; товаров - " + xCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements().Count());
-
-            progress.Report("Дата обновления - " + xCatalog.Element(yml_catalog).Attribute(date).Value);
+            catch(Exception e)
+            {
+                await LogAsync(e.Message);
+            }
 
         }
 

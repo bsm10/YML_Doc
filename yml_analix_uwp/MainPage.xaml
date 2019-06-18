@@ -1,11 +1,12 @@
 ﻿<Page
-    x:Class="YML_Doc.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Class="YML_Doc.MainPage"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Loaded="Page_Loaded">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
+    Loaded="Page_Loaded">
 
     <Pivot Title="One Home Beauty shop">
         <PivotItem Header="Main data">
@@ -110,11 +111,7 @@
             </Grid>
         </PivotItem>
 
-        <PivotItem Header="Shops">
-            <TextBlock Text="flagged emails go here." />
-        </PivotItem>
-        <PivotItem Header="Service">
-
-        </PivotItem>
+        <PivotItem Header="Shops"/>
+        <PivotItem Header="Service"/>
     </Pivot>
 </Page>
