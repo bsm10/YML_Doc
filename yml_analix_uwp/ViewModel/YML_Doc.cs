@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.ObjectModel;
+using System.Xml.Serialization;
 
 namespace YML_Doc
 {
@@ -408,25 +409,25 @@ namespace YML_Doc
         {
             get
             {
-                return this.shopField;
+                return shopField;
             }
             set
             {
-                this.shopField = value;
+                shopField = value;
             }
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string date
         {
             get
             {
-                return this.dateField;
+                return dateField;
             }
             set
             {
-                this.dateField = value;
+                dateField = value;
             }
         }
     }
@@ -435,37 +436,14 @@ namespace YML_Doc
     [XmlType(AnonymousType = true)]
     public partial class yml_catalogShop
     {
-
-        private yml_catalogShopCategory[] categoriesField;
-
-        private yml_catalogShopOffers offersField;
+        [XmlElement("url")]
+        public string url { get; set; }
+        /// <remarks/>
+        [XmlArrayItem("category", IsNullable = false)]
+        public yml_catalogShopCategory[] categories { get; set; }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlArrayItemAttribute("category", IsNullable = false)]
-        public yml_catalogShopCategory[] categories
-        {
-            get
-            {
-                return this.categoriesField;
-            }
-            set
-            {
-                this.categoriesField = value;
-            }
-        }
-
-        /// <remarks/>
-        public yml_catalogShopOffers offers
-        {
-            get
-            {
-                return this.offersField;
-            }
-            set
-            {
-                this.offersField = value;
-            }
-        }
+        public yml_catalogShopOffers offers { get; set; }
     }
 
     /// <remarks/>
@@ -473,69 +451,21 @@ namespace YML_Doc
     public partial class yml_catalogShopCategory
     {
 
-        private uint idField;
-
-        private uint parentIdField;
-
-        private bool parentIdFieldSpecified;
-
-        private string valueField;
+        /// <remarks/>
+        [XmlAttribute()]
+        public uint id { get; set; }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public uint id
-        {
-            get
-            {
-                return this.idField;
-            }
-            set
-            {
-                this.idField = value;
-            }
-        }
+        [XmlAttribute()]
+        public uint parentId { get; set; }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public uint parentId
-        {
-            get
-            {
-                return this.parentIdField;
-            }
-            set
-            {
-                this.parentIdField = value;
-            }
-        }
+        [XmlIgnore()]
+        public bool parentIdSpecified { get; set; }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool parentIdSpecified
-        {
-            get
-            {
-                return this.parentIdFieldSpecified;
-            }
-            set
-            {
-                this.parentIdFieldSpecified = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlTextAttribute()]
-        public string Value
-        {
-            get
-            {
-                return this.valueField;
-            }
-            set
-            {
-                this.valueField = value;
-            }
-        }
+        [XmlText()]
+        public string Value { get; set; }
     }
 
     /// <remarks/>
@@ -543,37 +473,13 @@ namespace YML_Doc
     public partial class yml_catalogShopOffers
     {
 
-        private yml_catalogShopOffersItem[] itemField;
-
-        private yml_catalogShopOffersOffer[] offerField;
+        /// <remarks/>
+        [XmlElement("item")]
+        public yml_catalogShopOffersItem[] item { get; set; }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlElement("item")]
-        public yml_catalogShopOffersItem[] item
-        {
-            get
-            {
-                return this.itemField;
-            }
-            set
-            {
-                this.itemField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElement("offer")]
-        public yml_catalogShopOffersOffer[] offer
-        {
-            get
-            {
-                return this.offerField;
-            }
-            set
-            {
-                this.offerField = value;
-            }
-        }
+        [XmlElement("offer")]
+        public yml_catalogShopOffersOffer[] offer { get; set; }
     }
 
     /// <remarks/>
@@ -682,12 +588,12 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("param")]
+        [XmlElement("param")]
         public yml_catalogShopOffersItemParam[] param
         {
             get
             {
-                return this.paramField;
+                return paramField;
             }
             set
             {
@@ -696,16 +602,16 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("picture")]
+        [XmlElement("picture")]
         public string[] picture
         {
             get
             {
-                return this.pictureField;
+                return pictureField;
             }
             set
             {
-                this.pictureField = value;
+                pictureField = value;
             }
         }
 
@@ -714,16 +620,16 @@ namespace YML_Doc
         {
             get
             {
-                return this.descriptionField;
+                return descriptionField;
             }
             set
             {
-                this.descriptionField = value;
+                descriptionField = value;
             }
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string id
         {
             get
@@ -737,7 +643,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string selling_type
         {
             get
@@ -763,7 +669,7 @@ namespace YML_Doc
         private string valueField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string name
         {
             get
@@ -777,7 +683,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string unit
         {
             get
@@ -791,7 +697,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlTextAttribute()]
+        [XmlText()]
         public string Value
         {
             get
@@ -825,24 +731,24 @@ namespace YML_Doc
         private bool group_idFieldSpecified;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("categoryId", typeof(uint))]
-        [System.Xml.Serialization.XmlElementAttribute("country_of_origin", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("currencyId", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("delivery", typeof(bool))]
-        [System.Xml.Serialization.XmlElementAttribute("description", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("keywords", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("name", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("oldprice", typeof(decimal))]
-        [System.Xml.Serialization.XmlElementAttribute("param", typeof(yml_catalogShopOffersOfferParam))]
-        [System.Xml.Serialization.XmlElementAttribute("pickup", typeof(bool))]
-        [System.Xml.Serialization.XmlElementAttribute("picture", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("portal_category_id", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("price", typeof(decimal))]
-        [System.Xml.Serialization.XmlElementAttribute("priceIn", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("url", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("vendor", typeof(string))]
-        [System.Xml.Serialization.XmlElementAttribute("vendorCode", typeof(string))]
-        [System.Xml.Serialization.XmlChoiceIdentifierAttribute("ItemsElementName")]
+        [XmlElement("categoryId", typeof(uint))]
+        [XmlElement("country_of_origin", typeof(string))]
+        [XmlElement("currencyId", typeof(string))]
+        [XmlElement("delivery", typeof(bool))]
+        [XmlElement("description", typeof(string))]
+        [XmlElement("keywords", typeof(string))]
+        [XmlElement("name", typeof(string))]
+        [XmlElement("oldprice", typeof(decimal))]
+        [XmlElement("param", typeof(yml_catalogShopOffersOfferParam))]
+        [XmlElement("pickup", typeof(bool))]
+        [XmlElement("picture", typeof(string))]
+        [XmlElement("portal_category_id", typeof(string))]
+        [XmlElement("price", typeof(decimal))]
+        [XmlElement("priceIn", typeof(string))]
+        [XmlElement("url", typeof(string))]
+        [XmlElement("vendor", typeof(string))]
+        [XmlElement("vendorCode", typeof(string))]
+        [XmlChoiceIdentifier("ItemsElementName")]
         public object[] Items
         {
             get
@@ -856,8 +762,8 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("ItemsElementName")]
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlElement("ItemsElementName")]
+        [XmlIgnore()]
         public ItemsChoiceType[] ItemsElementName
         {
             get
@@ -871,7 +777,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public uint id
         {
             get
@@ -885,7 +791,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public bool available
         {
             get
@@ -899,7 +805,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string selling_type
         {
             get
@@ -913,7 +819,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public uint group_id
         {
             get
@@ -927,7 +833,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore()]
         public bool group_idSpecified
         {
             get
@@ -953,7 +859,7 @@ namespace YML_Doc
         private string valueField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string name
         {
             get
@@ -967,7 +873,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string unit
         {
             get
@@ -981,7 +887,7 @@ namespace YML_Doc
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlTextAttribute()]
+        [XmlText()]
         public string Value
         {
             get

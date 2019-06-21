@@ -28,11 +28,12 @@ namespace YML_Doc
         string taskEntryPoint = "RuntimeComponentOHB.YMLShopUpdate";
         BackgroundTaskRegistration bkTask;
 
+        public ViewModel viewModel;
 
         public MainPage()
         {
             InitializeComponent();
-            ViewModel viewModel = new ViewModel();
+            viewModel = new ViewModel();
             DataContext = viewModel;
             progress = new Progress<string>(s => txtStatus.Text = txtStatus.Text + s + "\r\n");
             startTime = DateTime.Now;
