@@ -4,10 +4,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Class="YML_Doc.MainPage"
+    xmlns:data="using:YML_Doc.ViewModel"
     mc:Ignorable="d"
+    d:DataContext="{d:DesignData Source=/DataFiles/top_group.xml;}"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
     Loaded="Page_Loaded">
-
     <Pivot Title="One Home Beauty shop">
         <PivotItem Header="Main data">
             <Grid>
@@ -110,8 +111,42 @@
                 </StackPanel>
             </Grid>
         </PivotItem>
-
-        <PivotItem Header="Shops"/>
         <PivotItem Header="Service"/>
+        <PivotItem Header="Shops">
+            <StackPanel>
+                <TextBlock x:Name="Name"
+                                       Height="90"
+                                       Text="{Binding yml_catalog.shop.url}"/>
+
+                <TextBlock x:Name="Date"
+                                       Height="90"
+                                       Text="{Binding Date}"
+                                       />
+            </StackPanel>
+
+            <!--<FlipView BorderBrush="BlueViolet"
+                      ItemsSource="{Binding}"
+                      BorderThickness="2"
+                      Margin="10,10,10,10"
+                      Background="#FF001F19"
+                      >
+                >
+                <FlipView.ItemTemplate>
+                    <DataTemplate>
+                        -->
+            <!--<Grid>-->
+            <!--<Image Height="120" Stretch="Uniform" VerticalAlignment="Top"/>-->
+            <!--<Border Background="#A5FFFFFF" Height="60" VerticalAlignment="Bottom">
+                            -->
+            <!--<TextBlock Text="" Foreground="#CCFFFFFF" Padding="12,12" HorizontalAlignment="Center"-->
+            <!--
+                                
+                            </Border>-->
+            <!--</Grid>-->
+            <!--
+                    </DataTemplate>
+                </FlipView.ItemTemplate>
+            </FlipView>-->
+        </PivotItem>
     </Pivot>
 </Page>

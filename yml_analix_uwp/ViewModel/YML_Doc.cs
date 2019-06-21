@@ -1,12 +1,406 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.IO;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+using Windows.Storage;
 
-namespace YML_Doc.ViewModel
+namespace YML_Doc
 {
-    public partial class YML_Catalog
+    ///// <remarks/>
+    //[XmlType(AnonymousType = true)]
+    //[XmlRoot(Namespace = "", IsNullable = false)]
+    //public partial class yml_catalog
+    //{
+    //    private yml_catalogShop shopField;
+
+    //    private string dateField;
+
+    //    /// <remarks/>
+    //    public yml_catalogShop shop
+    //    {
+    //        get
+    //        {
+    //            return this.shopField;
+    //        }
+    //        set
+    //        {
+    //            this.shopField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [XmlAttribute("date")]
+    //    public string date
+    //    {
+    //        get
+    //        {
+    //            return this.dateField;
+    //        }
+    //        set
+    //        {
+    //            this.dateField = value;
+    //        }
+    //    }
+    //}
+
+    ///// <remarks/>
+    //[XmlType(AnonymousType = true)]
+    //public partial class yml_catalogShop
+    //{
+
+    //    private string urlField;
+
+    //    private yml_catalogShopCurrencies currenciesField;
+
+    //    private yml_catalogShopCategory[] categoriesField;
+
+    //    private yml_catalogShopItem[] offersField;
+
+    //    /// <remarks/>
+    //    public string url
+    //    {
+    //        get
+    //        {
+    //            return this.urlField;
+    //        }
+    //        set
+    //        {
+    //            this.urlField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    public yml_catalogShopCurrencies currencies
+    //    {
+    //        get
+    //        {
+    //            return this.currenciesField;
+    //        }
+    //        set
+    //        {
+    //            this.currenciesField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [XmlArrayItem("category", IsNullable = false)]
+    //    public yml_catalogShopCategory[] categories
+    //    {
+    //        get
+    //        {
+    //            return this.categoriesField;
+    //        }
+    //        set
+    //        {
+    //            this.categoriesField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [XmlArrayItem(IsNullable = false)]
+    //    public yml_catalogShopItem[] offers
+    //    {
+    //        get
+    //        {
+    //            return this.offersField;
+    //        }
+    //        set
+    //        {
+    //            this.offersField = value;
+    //        }
+    //    }
+    //}
+
+    ///// <remarks/>
+    //[XmlType(AnonymousType = true)]
+    //public partial class yml_catalogShopCurrencies
+    //{
+
+    //    private yml_catalogShopCurrenciesCurrency currencyField;
+
+    //    /// <remarks/>
+    //    public yml_catalogShopCurrenciesCurrency currency
+    //    {
+    //        get
+    //        {
+    //            return this.currencyField;
+    //        }
+    //        set
+    //        {
+    //            this.currencyField = value;
+    //        }
+    //    }
+    //}
+
+    ///// <remarks/>
+    //[XmlType(AnonymousType = true)]
+    //public partial class yml_catalogShopCurrenciesCurrency
+    //{
+
+    //    private string idField;
+
+    //    private byte rateField;
+
+    //    /// <remarks/>
+    //    [System.Xml.Serialization.XmlAttributeAttribute()]
+    //    public string id
+    //    {
+    //        get
+    //        {
+    //            return this.idField;
+    //        }
+    //        set
+    //        {
+    //            this.idField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [System.Xml.Serialization.XmlAttributeAttribute()]
+    //    public byte rate
+    //    {
+    //        get
+    //        {
+    //            return this.rateField;
+    //        }
+    //        set
+    //        {
+    //            this.rateField = value;
+    //        }
+    //    }
+    //}
+
+    ///// <remarks/>
+    //[XmlType(AnonymousType = true)]
+    //public partial class yml_catalogShopCategory
+    //{
+
+    //    private byte idField;
+
+    //    private byte parentIdField;
+
+    //    private bool parentIdFieldSpecified;
+
+    //    private string valueField;
+
+    //    /// <remarks/>
+    //    [XmlAttribute()]
+    //    public byte id
+    //    {
+    //        get
+    //        {
+    //            return this.idField;
+    //        }
+    //        set
+    //        {
+    //            this.idField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [XmlAttribute()]
+    //    public byte parentId
+    //    {
+    //        get
+    //        {
+    //            return this.parentIdField;
+    //        }
+    //        set
+    //        {
+    //            this.parentIdField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [XmlIgnore()]
+    //    public bool parentIdSpecified
+    //    {
+    //        get
+    //        {
+    //            return this.parentIdFieldSpecified;
+    //        }
+    //        set
+    //        {
+    //            this.parentIdFieldSpecified = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [XmlText()]
+    //    public string Value
+    //    {
+    //        get
+    //        {
+    //            return this.valueField;
+    //        }
+    //        set
+    //        {
+    //            this.valueField = value;
+    //        }
+    //    }
+    //}
+
+    ///// <remarks/>
+    //[XmlType(AnonymousType = true)]
+    //public partial class yml_catalogShopItem
+    //{
+
+    //    private string vendorCodeField;
+
+    //    private byte categoryIdField;
+
+    //    private string nameField;
+
+    //    private decimal priceField;
+
+    //    private string availableField;
+
+    //    private decimal price_optField;
+
+    //    private string[] pictureField;
+
+    //    private string descriptionField;
+
+    //    private string idField;
+
+    //    private string selling_typeField;
+
+    //    /// <remarks/>
+    //    public string vendorCode
+    //    {
+    //        get
+    //        {
+    //            return this.vendorCodeField;
+    //        }
+    //        set
+    //        {
+    //            this.vendorCodeField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    public byte categoryId
+    //    {
+    //        get
+    //        {
+    //            return this.categoryIdField;
+    //        }
+    //        set
+    //        {
+    //            this.categoryIdField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    public string name
+    //    {
+    //        get
+    //        {
+    //            return this.nameField;
+    //        }
+    //        set
+    //        {
+    //            this.nameField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    public decimal price
+    //    {
+    //        get
+    //        {
+    //            return this.priceField;
+    //        }
+    //        set
+    //        {
+    //            this.priceField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    public string available
+    //    {
+    //        get
+    //        {
+    //            return this.availableField;
+    //        }
+    //        set
+    //        {
+    //            this.availableField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    public decimal price_opt
+    //    {
+    //        get
+    //        {
+    //            return this.price_optField;
+    //        }
+    //        set
+    //        {
+    //            this.price_optField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [System.Xml.Serialization.XmlElementAttribute("picture")]
+    //    public string[] picture
+    //    {
+    //        get
+    //        {
+    //            return this.pictureField;
+    //        }
+    //        set
+    //        {
+    //            this.pictureField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    public string description
+    //    {
+    //        get
+    //        {
+    //            return this.descriptionField;
+    //        }
+    //        set
+    //        {
+    //            this.descriptionField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [System.Xml.Serialization.XmlAttributeAttribute()]
+    //    public string id
+    //    {
+    //        get
+    //        {
+    //            return this.idField;
+    //        }
+    //        set
+    //        {
+    //            this.idField = value;
+    //        }
+    //    }
+
+    //    /// <remarks/>
+    //    [System.Xml.Serialization.XmlAttributeAttribute()]
+    //    public string selling_type
+    //    {
+    //        get
+    //        {
+    //            return this.selling_typeField;
+    //        }
+    //        set
+    //        {
+    //            this.selling_typeField = value;
+    //        }
+    //    }
+    //}
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
+    public partial class yml_catalog
     {
 
         private yml_catalogShop shopField;
@@ -26,6 +420,8 @@ namespace YML_Doc.ViewModel
             }
         }
 
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
         public string date
         {
             get
@@ -39,74 +435,17 @@ namespace YML_Doc.ViewModel
         }
     }
 
+    /// <remarks/>
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
     public partial class yml_catalogShop
     {
 
-        private string nameField;
-
-        private string companyField;
-
-        private string urlField;
-
-        private yml_catalogShopCurrency[] currenciesField;
-
         private yml_catalogShopCategory[] categoriesField;
 
-        private yml_catalogShopDeliveryoptions deliveryoptionsField;
-
-        private yml_catalogShopOffer[] offersField;
+        private yml_catalogShopOffers offersField;
 
         /// <remarks/>
-        public string name
-        {
-            get
-            {
-                return this.nameField;
-            }
-            set
-            {
-                this.nameField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string company
-        {
-            get
-            {
-                return this.companyField;
-            }
-            set
-            {
-                this.companyField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string url
-        {
-            get
-            {
-                return this.urlField;
-            }
-            set
-            {
-                this.urlField = value;
-            }
-        }
-
-        public yml_catalogShopCurrency[] currencies
-        {
-            get
-            {
-                return this.currenciesField;
-            }
-            set
-            {
-                this.currenciesField = value;
-            }
-        }
-
+        [System.Xml.Serialization.XmlArrayItemAttribute("category", IsNullable = false)]
         public yml_catalogShopCategory[] categories
         {
             get
@@ -119,19 +458,8 @@ namespace YML_Doc.ViewModel
             }
         }
 
-        public yml_catalogShopDeliveryoptions deliveryoptions
-        {
-            get
-            {
-                return this.deliveryoptionsField;
-            }
-            set
-            {
-                this.deliveryoptionsField = value;
-            }
-        }
-
-        public yml_catalogShopOffer[] offers
+        /// <remarks/>
+        public yml_catalogShopOffers offers
         {
             get
             {
@@ -144,48 +472,14 @@ namespace YML_Doc.ViewModel
         }
     }
 
-    public partial class yml_catalogShopCurrency
-    {
-
-        private string idField;
-
-        private byte rateField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string id
-        {
-            get
-            {
-                return this.idField;
-            }
-            set
-            {
-                this.idField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte rate
-        {
-            get
-            {
-                return this.rateField;
-            }
-            set
-            {
-                this.rateField = value;
-            }
-        }
-    }
-
+    /// <remarks/>
+    [System.Xml.Serialization.XmlType(AnonymousType = true)]
     public partial class yml_catalogShopCategory
     {
 
-        private byte idField;
+        private uint idField;
 
-        private byte parentIdField;
+        private uint parentIdField;
 
         private bool parentIdFieldSpecified;
 
@@ -193,7 +487,7 @@ namespace YML_Doc.ViewModel
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte id
+        public uint id
         {
             get
             {
@@ -207,7 +501,7 @@ namespace YML_Doc.ViewModel
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte parentId
+        public uint parentId
         {
             get
             {
@@ -248,195 +542,70 @@ namespace YML_Doc.ViewModel
         }
     }
 
-    public partial class yml_catalogShopDeliveryoptions
+    /// <remarks/>
+    [System.Xml.Serialization.XmlType(AnonymousType = true)]
+    public partial class yml_catalogShopOffers
     {
 
-        private yml_catalogShopDeliveryoptionsOption optionField;
+        private yml_catalogShopOffersItem[] itemField;
+
+        private yml_catalogShopOffersOffer[] offerField;
 
         /// <remarks/>
-        public yml_catalogShopDeliveryoptionsOption option
+        [System.Xml.Serialization.XmlElement("item")]
+        public yml_catalogShopOffersItem[] item
         {
             get
             {
-                return this.optionField;
+                return this.itemField;
             }
             set
             {
-                this.optionField = value;
+                this.itemField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElement("offer")]
+        public yml_catalogShopOffersOffer[] offer
+        {
+            get
+            {
+                return this.offerField;
+            }
+            set
+            {
+                this.offerField = value;
             }
         }
     }
 
-    public partial class yml_catalogShopDeliveryoptionsOption
+    /// <remarks/>
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    public partial class yml_catalogShopOffersItem
     {
-
-        private ushort costField;
-
-        private byte daysField;
-
-        private byte orderbeforeField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public ushort cost
-        {
-            get
-            {
-                return this.costField;
-            }
-            set
-            {
-                this.costField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte days
-        {
-            get
-            {
-                return this.daysField;
-            }
-            set
-            {
-                this.daysField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute("order-before")]
-        public byte orderbefore
-        {
-            get
-            {
-                return this.orderbeforeField;
-            }
-            set
-            {
-                this.orderbeforeField = value;
-            }
-        }
-    }
-
-    public partial class yml_catalogShopOffer
-    {
-
-        private string typePrefixField;
-
-        private string nameField;
-
-        private string vendorField;
-
-        private ushort modelField;
-
-        private bool modelFieldSpecified;
 
         private string vendorCodeField;
 
-        private string urlField;
-
-        private ushort priceField;
-
-        private ushort oldpriceField;
-
-        private string currencyIdField;
-
         private byte categoryIdField;
 
-        private string pictureField;
+        private string nameField;
 
-        private bool storeField;
+        private decimal priceField;
 
-        private bool pickupField;
+        private string availableField;
 
-        private bool deliveryField;
+        private decimal price_optField;
 
-        private yml_catalogShopOfferDeliveryoptions deliveryoptionsField;
+        private yml_catalogShopOffersItemParam[] paramField;
+
+        private string[] pictureField;
 
         private string descriptionField;
 
-        private yml_catalogShopOfferParam paramField;
+        private string idField;
 
-        private string sales_notesField;
-
-        private bool manufacturer_warrantyField;
-
-        private string country_of_originField;
-
-        private ulong barcodeField;
-
-        private ushort idField;
-
-        private byte bidField;
-
-        private string typeField;
-
-        /// <remarks/>
-        public string typePrefix
-        {
-            get
-            {
-                return this.typePrefixField;
-            }
-            set
-            {
-                this.typePrefixField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string name
-        {
-            get
-            {
-                return this.nameField;
-            }
-            set
-            {
-                this.nameField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string vendor
-        {
-            get
-            {
-                return this.vendorField;
-            }
-            set
-            {
-                this.vendorField = value;
-            }
-        }
-
-        /// <remarks/>
-        public ushort model
-        {
-            get
-            {
-                return this.modelField;
-            }
-            set
-            {
-                this.modelField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool modelSpecified
-        {
-            get
-            {
-                return this.modelFieldSpecified;
-            }
-            set
-            {
-                this.modelFieldSpecified = value;
-            }
-        }
+        private string selling_typeField;
 
         /// <remarks/>
         public string vendorCode
@@ -448,58 +617,6 @@ namespace YML_Doc.ViewModel
             set
             {
                 this.vendorCodeField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string url
-        {
-            get
-            {
-                return this.urlField;
-            }
-            set
-            {
-                this.urlField = value;
-            }
-        }
-
-        /// <remarks/>
-        public ushort price
-        {
-            get
-            {
-                return this.priceField;
-            }
-            set
-            {
-                this.priceField = value;
-            }
-        }
-
-        /// <remarks/>
-        public ushort oldprice
-        {
-            get
-            {
-                return this.oldpriceField;
-            }
-            set
-            {
-                this.oldpriceField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string currencyId
-        {
-            get
-            {
-                return this.currencyIdField;
-            }
-            set
-            {
-                this.currencyIdField = value;
             }
         }
 
@@ -517,7 +634,74 @@ namespace YML_Doc.ViewModel
         }
 
         /// <remarks/>
-        public string picture
+        public string name
+        {
+            get
+            {
+                return this.nameField;
+            }
+            set
+            {
+                this.nameField = value;
+            }
+        }
+
+        /// <remarks/>
+        public decimal price
+        {
+            get
+            {
+                return this.priceField;
+            }
+            set
+            {
+                this.priceField = value;
+            }
+        }
+
+        /// <remarks/>
+        public string available
+        {
+            get
+            {
+                return this.availableField;
+            }
+            set
+            {
+                this.availableField = value;
+            }
+        }
+
+        /// <remarks/>
+        public decimal price_opt
+        {
+            get
+            {
+                return this.price_optField;
+            }
+            set
+            {
+                this.price_optField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("param")]
+        public yml_catalogShopOffersItemParam[] param
+        {
+            get
+            {
+                return this.paramField;
+            }
+            set
+            {
+                this.paramField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("picture")]
+        public string[] picture
         {
             get
             {
@@ -526,59 +710,6 @@ namespace YML_Doc.ViewModel
             set
             {
                 this.pictureField = value;
-            }
-        }
-
-        /// <remarks/>
-        public bool store
-        {
-            get
-            {
-                return this.storeField;
-            }
-            set
-            {
-                this.storeField = value;
-            }
-        }
-
-        /// <remarks/>
-        public bool pickup
-        {
-            get
-            {
-                return this.pickupField;
-            }
-            set
-            {
-                this.pickupField = value;
-            }
-        }
-
-        /// <remarks/>
-        public bool delivery
-        {
-            get
-            {
-                return this.deliveryField;
-            }
-            set
-            {
-                this.deliveryField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("delivery-options")]
-        public yml_catalogShopOfferDeliveryoptions deliveryoptions
-        {
-            get
-            {
-                return this.deliveryoptionsField;
-            }
-            set
-            {
-                this.deliveryoptionsField = value;
             }
         }
 
@@ -596,73 +727,8 @@ namespace YML_Doc.ViewModel
         }
 
         /// <remarks/>
-        public yml_catalogShopOfferParam param
-        {
-            get
-            {
-                return this.paramField;
-            }
-            set
-            {
-                this.paramField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string sales_notes
-        {
-            get
-            {
-                return this.sales_notesField;
-            }
-            set
-            {
-                this.sales_notesField = value;
-            }
-        }
-
-        /// <remarks/>
-        public bool manufacturer_warranty
-        {
-            get
-            {
-                return this.manufacturer_warrantyField;
-            }
-            set
-            {
-                this.manufacturer_warrantyField = value;
-            }
-        }
-
-        /// <remarks/>
-        public string country_of_origin
-        {
-            get
-            {
-                return this.country_of_originField;
-            }
-            set
-            {
-                this.country_of_originField = value;
-            }
-        }
-
-        /// <remarks/>
-        public ulong barcode
-        {
-            get
-            {
-                return this.barcodeField;
-            }
-            set
-            {
-                this.barcodeField = value;
-            }
-        }
-
-        /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public ushort id
+        public string id
         {
             get
             {
@@ -676,108 +742,27 @@ namespace YML_Doc.ViewModel
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte bid
+        public string selling_type
         {
             get
             {
-                return this.bidField;
+                return this.selling_typeField;
             }
             set
             {
-                this.bidField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string type
-        {
-            get
-            {
-                return this.typeField;
-            }
-            set
-            {
-                this.typeField = value;
+                this.selling_typeField = value;
             }
         }
     }
 
-    public partial class yml_catalogShopOfferDeliveryoptions
-    {
-
-        private yml_catalogShopOfferDeliveryoptionsOption optionField;
-
-        /// <remarks/>
-        public yml_catalogShopOfferDeliveryoptionsOption option
-        {
-            get
-            {
-                return this.optionField;
-            }
-            set
-            {
-                this.optionField = value;
-            }
-        }
-    }
-
-    public partial class yml_catalogShopOfferDeliveryoptionsOption
-    {
-
-        private ushort costField;
-
-        private byte daysField;
-
-        private byte orderbeforeField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public ushort cost
-        {
-            get
-            {
-                return this.costField;
-            }
-            set
-            {
-                this.costField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte days
-        {
-            get
-            {
-                return this.daysField;
-            }
-            set
-            {
-                this.daysField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute("order-before")]
-        public byte orderbefore
-        {
-            get
-            {
-                return this.orderbeforeField;
-            }
-            set
-            {
-                this.orderbeforeField = value;
-            }
-        }
-    }
-
-    public partial class yml_catalogShopOfferParam
+    /// <remarks/>
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    public partial class yml_catalogShopOffersItemParam
     {
 
         private string nameField;
+
+        private string unitField;
 
         private string valueField;
 
@@ -796,6 +781,20 @@ namespace YML_Doc.ViewModel
         }
 
         /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string unit
+        {
+            get
+            {
+                return this.unitField;
+            }
+            set
+            {
+                this.unitField = value;
+            }
+        }
+
+        /// <remarks/>
         [System.Xml.Serialization.XmlTextAttribute()]
         public string Value
         {
@@ -810,5 +809,251 @@ namespace YML_Doc.ViewModel
         }
     }
 
+    /// <remarks/>
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    public partial class yml_catalogShopOffersOffer
+    {
+
+        private object[] itemsField;
+
+        private ItemsChoiceType[] itemsElementNameField;
+
+        private uint idField;
+
+        private bool availableField;
+
+        private string selling_typeField;
+
+        private uint group_idField;
+
+        private bool group_idFieldSpecified;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("categoryId", typeof(uint))]
+        [System.Xml.Serialization.XmlElementAttribute("country_of_origin", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("currencyId", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("delivery", typeof(bool))]
+        [System.Xml.Serialization.XmlElementAttribute("description", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("keywords", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("name", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("oldprice", typeof(decimal))]
+        [System.Xml.Serialization.XmlElementAttribute("param", typeof(yml_catalogShopOffersOfferParam))]
+        [System.Xml.Serialization.XmlElementAttribute("pickup", typeof(bool))]
+        [System.Xml.Serialization.XmlElementAttribute("picture", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("portal_category_id", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("price", typeof(decimal))]
+        [System.Xml.Serialization.XmlElementAttribute("priceIn", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("url", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("vendor", typeof(string))]
+        [System.Xml.Serialization.XmlElementAttribute("vendorCode", typeof(string))]
+        [System.Xml.Serialization.XmlChoiceIdentifierAttribute("ItemsElementName")]
+        public object[] Items
+        {
+            get
+            {
+                return this.itemsField;
+            }
+            set
+            {
+                this.itemsField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("ItemsElementName")]
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public ItemsChoiceType[] ItemsElementName
+        {
+            get
+            {
+                return this.itemsElementNameField;
+            }
+            set
+            {
+                this.itemsElementNameField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public uint id
+        {
+            get
+            {
+                return this.idField;
+            }
+            set
+            {
+                this.idField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public bool available
+        {
+            get
+            {
+                return this.availableField;
+            }
+            set
+            {
+                this.availableField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string selling_type
+        {
+            get
+            {
+                return this.selling_typeField;
+            }
+            set
+            {
+                this.selling_typeField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public uint group_id
+        {
+            get
+            {
+                return this.group_idField;
+            }
+            set
+            {
+                this.group_idField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool group_idSpecified
+        {
+            get
+            {
+                return this.group_idFieldSpecified;
+            }
+            set
+            {
+                this.group_idFieldSpecified = value;
+            }
+        }
+    }
+
+    /// <remarks/>
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    public partial class yml_catalogShopOffersOfferParam
+    {
+
+        private string nameField;
+
+        private string unitField;
+
+        private string valueField;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string name
+        {
+            get
+            {
+                return this.nameField;
+            }
+            set
+            {
+                this.nameField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string unit
+        {
+            get
+            {
+                return this.unitField;
+            }
+            set
+            {
+                this.unitField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlTextAttribute()]
+        public string Value
+        {
+            get
+            {
+                return this.valueField;
+            }
+            set
+            {
+                this.valueField = value;
+            }
+        }
+    }
+
+    /// <remarks/>
+    [System.Xml.Serialization.XmlTypeAttribute(IncludeInSchema = false)]
+    public enum ItemsChoiceType
+    {
+
+        /// <remarks/>
+        categoryId,
+
+        /// <remarks/>
+        country_of_origin,
+
+        /// <remarks/>
+        currencyId,
+
+        /// <remarks/>
+        delivery,
+
+        /// <remarks/>
+        description,
+
+        /// <remarks/>
+        keywords,
+
+        /// <remarks/>
+        name,
+
+        /// <remarks/>
+        oldprice,
+
+        /// <remarks/>
+        param,
+
+        /// <remarks/>
+        pickup,
+
+        /// <remarks/>
+        picture,
+
+        /// <remarks/>
+        portal_category_id,
+
+        /// <remarks/>
+        price,
+
+        /// <remarks/>
+        priceIn,
+
+        /// <remarks/>
+        url,
+
+        /// <remarks/>
+        vendor,
+
+        /// <remarks/>
+        vendorCode,
+    }
 
 }

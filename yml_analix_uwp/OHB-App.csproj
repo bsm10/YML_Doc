@@ -177,7 +177,9 @@
     <Content Include="DataFiles\shops-yml.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <DesignData Include="DataFiles\top_group.xml" />
+    <Content Include="DataFiles\top_group.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

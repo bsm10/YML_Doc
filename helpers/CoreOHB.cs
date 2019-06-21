@@ -17,6 +17,7 @@ using static CoreOHB.Helpers.Files;
 
 using Windows.Storage;
 using Windows.UI.Notifications;
+using Windows.Networking.Connectivity;
 
 namespace CoreOHB
 {
@@ -181,6 +182,12 @@ namespace CoreOHB
 
                 progress.Report("Дата обновления - " + xCatalog.Element(yml_catalog).Attribute(date).Value);
             }
+            catch(XmlException e)
+            {
+                await LogAsync(e.Message);
+                await LogAsync("Пробую обновить магазин...");
+                await UpdateOneHomeBeautyAsync();
+            }
             catch(Exception e)
             {
                 await LogAsync(e.Message);
@@ -190,9 +197,18 @@ namespace CoreOHB
 
         public static async Task UpdateOneHomeBeautyAsync(IProgress<string> progress = null)
         {
-            await GetShopsAsync(progress);
-            await SaveXml();
-            await UploadShopAsync();
+
+            // Проверяем есть ли подключение к интернету
+            if (NetWork.InternetAvailable())
+            {
+                await GetShopsAsync(progress);
+                await SaveXml();
+                await UploadShopAsync();
+            }
+            else
+            {
+                await LogAsync("Нет подключения к интернету, обновление не состоялось");
+            }
         }
     }
     public static class Helpers
@@ -315,6 +331,22 @@ namespace CoreOHB
                 }
 
             }
+
+
+        }
+        public static class NetWork
+        {
+            /// <summary>
+            /// Проверяет есть ли подключение к интернету. Возвращает Истину если Да
+            /// </summary>
+            /// <returns></returns>
+            public static bool InternetAvailable()
+            {
+                var connectionProfile = NetworkInformation.GetInternetConnectionProfile();
+                return (connectionProfile != null &&
+                        connectionProfile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
+            }
+
         }
     }
 }

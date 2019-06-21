@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using static CoreOHB.CoreOHB;
 using static CoreOHB.Helpers;
@@ -9,8 +8,6 @@ using Windows.ApplicationModel.Background;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-
-using YML_Doc.ViewModel;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -35,20 +32,9 @@ namespace YML_Doc
         public MainPage()
         {
             InitializeComponent();
-            ViewModelCatalog viewModel = new ViewModelCatalog();
+            ViewModel viewModel = new ViewModel();
+            DataContext = viewModel;
             progress = new Progress<string>(s => txtStatus.Text = txtStatus.Text + s + "\r\n");
-            //  DispatcherTimer setup
-            //dispatcherTimer = new DispatcherTimer();
-            //dispatcherTimer.Tick += dispatcherTimer_TickAsync;
-            //timePiker.Time = new TimeSpan(4, 0, 0);
-            //dispatcherTimer.Interval = timePiker.Time;
-            //dispatcherTimer.Interval = new TimeSpan(0, (int)numericUpDown1.Value, 0);
-            //dispatcherTimer.Start();
-
-            //dispatcherTimer2 = new DispatcherTimer();
-            //dispatcherTimer2.Tick += dispatcherTimer_Tick2;
-            //dispatcherTimer2.Interval = new TimeSpan(0, 0, 1);
-            //dispatcherTimer2.Start();
             startTime = DateTime.Now;
             endTime = startTime.Add(timePiker.Time);
             RestoreSettimgs();
@@ -69,19 +55,15 @@ namespace YML_Doc
 
         }
 
-        //private async void dispatcherTimer_TickAsync(object sender, object e)
-        //{
-        //    await YML_prog.UpdateOneHomeBeauty(progress);
-        //    startTime = DateTime.Now;
-        //    endTime = startTime.Add(timePiker.Time);
-        //}
-
         private async void BtnUpdate_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             try
             {
-                await UpdateOneHomeBeautyAsync(progress);
-                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                if(NetWork.InternetAvailable())
+                {
+                    await UpdateOneHomeBeautyAsync(progress);
+                    await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                }
             }
             catch (Exception exc)
             {
@@ -94,7 +76,7 @@ namespace YML_Doc
         {
             try
             {
-                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                if(NetWork.InternetAvailable())await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
             }
             catch (Exception exc)
             {
@@ -207,14 +189,21 @@ namespace YML_Doc
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            try
+            if (NetWork.InternetAvailable())
             {
-                await CreateLogFileAsync();
-                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                try
+                {
+                    await CreateLogFileAsync();
+                    await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                }
+                catch (Exception exc)
+                {
+                    ToastNotifications.ShowToast("Page_Loaded", exc.Message);
+                }
             }
-            catch (Exception exc)
+            else
             {
-                ToastNotifications.ShowToast("Page_Loaded", exc.Message);
+                ToastNotifications.ShowToast(App.Current.ToString(), "Нет интернета! Обновления не будет!");
             }
         }
 
@@ -305,5 +294,24 @@ namespace YML_Doc
 
         }
 
+    }
+    public class OHBShops : DependencyObject
+    {
+        //public YML_Catalog Shop
+        //{
+        //    get
+        //    {
+        //        return (YML_Catalog)GetValue(ItemCo)
+        //    }
+        //}
+        public int ItemCount
+        {
+            get { return (int)GetValue(ItemCountProperty); }
+            set { SetValue(ItemCountProperty, value); }
+        }
+
+        public static readonly DependencyProperty ItemCountProperty =
+             DependencyProperty.Register("ItemCount", typeof(int),
+             typeof(yml_catalog), new PropertyMetadata(0));
     }
 }
