@@ -4,7 +4,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Class="YML_Doc.MainPage"
-    xmlns:data="using:YML_Doc.ViewModel"
     mc:Ignorable="d"
     d:DataContext="{d:DesignData Source=/DataFiles/top_group.xml;}"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 

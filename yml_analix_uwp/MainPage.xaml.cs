@@ -40,20 +40,6 @@ namespace YML_Doc
             RestoreSettimgs();
         }
 
-        TimeSpan ts;
-        private void dispatcherTimer_Tick2(object sender, object e)
-        {
-            //if (endTime > DateTime.Now)
-            //{
-            //    ts = endTime - DateTime.Now;
-            //    txt1.Text = "До обновления осталось - " + ts.ToString(@"hh\:mm\:ss");
-            //}
-            //else
-            //{
-            //    txt1.Text = "До обновления осталось - 0";
-            //}
-
-        }
 
         private async void BtnUpdate_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {

@@ -1,8 +1,4 @@
-﻿using System.ComponentModel;
-using System.IO;
-using System.Xml.Linq;
-using System.Xml.Serialization;
-using Windows.Storage;
+﻿using System.Xml.Serialization;
 
 namespace YML_Doc
 {
@@ -398,8 +394,8 @@ namespace YML_Doc
     //        }
     //    }
     //}
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
+    [XmlType(AnonymousType = true)]
+    [XmlRoot(Namespace = "", IsNullable = false)]
     public partial class yml_catalog
     {
 
@@ -436,7 +432,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    [XmlType(AnonymousType = true)]
     public partial class yml_catalogShop
     {
 
@@ -473,7 +469,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlType(AnonymousType = true)]
+    [XmlType(AnonymousType = true)]
     public partial class yml_catalogShopCategory
     {
 
@@ -543,7 +539,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlType(AnonymousType = true)]
+    [XmlType(AnonymousType = true)]
     public partial class yml_catalogShopOffers
     {
 
@@ -581,7 +577,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    [XmlType(AnonymousType = true)]
     public partial class yml_catalogShopOffersItem
     {
 
@@ -756,7 +752,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    [XmlType(AnonymousType = true)]
     public partial class yml_catalogShopOffersItemParam
     {
 
@@ -810,7 +806,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    [XmlType(AnonymousType = true)]
     public partial class yml_catalogShopOffersOffer
     {
 
@@ -946,7 +942,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    [XmlType(AnonymousType = true)]
     public partial class yml_catalogShopOffersOfferParam
     {
 
@@ -1000,7 +996,7 @@ namespace YML_Doc
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlTypeAttribute(IncludeInSchema = false)]
+    [XmlType(IncludeInSchema = false)]
     public enum ItemsChoiceType
     {
 
