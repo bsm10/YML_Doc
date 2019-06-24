@@ -180,6 +180,7 @@ namespace YML_Doc
             {
                 try
                 {
+                    await NetWork.DownloadYML();
                     await CreateLogFileAsync();
                     await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
                 }

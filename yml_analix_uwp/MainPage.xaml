@@ -9,6 +9,7 @@
     
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
     Loaded="Page_Loaded">
+
     <Pivot Title="One Home Beauty shop">
         <PivotItem Header="Main data">
             <Grid>
@@ -112,14 +113,31 @@
             </Grid>
         </PivotItem>
         <PivotItem Header="Shops">
-            <StackPanel d:DataContext="{d:DesignData Source=/DataFiles/top_group.xml, Type=local:YMLCatalog}">
+            <!--<StackPanel d:DataContext="{d:DesignInstance Type=local:ViewModel, IsDesignTimeCreatable=True}">-->
+                <StackPanel d:DataContext="{StaticResource DesignData}">
+                
+                <!--<TextBlock x:Name="Name"
+                                       Height="90"
+                                       Text="{x:Bind Path=viewModel.YMLCatalog.date, Mode=OneWay}"/>-->
                 <TextBlock x:Name="Name"
-                                       Height="90"
-                                       Text="{x:Bind Path=viewModel.YMLCatalog.date, Mode=OneWay}"/>
-
+                           Height="50"
+                           FontSize="18"
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Stretch"
+                           FontFamily="Trebuchet MS" 
+                           Text="{Binding YMLCatalog}"/>
                 <TextBlock x:Name="Date"
-                                       Height="90"
-                                       Text="{x:Bind Path=viewModel.YMLCatalog.shop.url, Mode=OneWay}"/>
+                           Height="50"
+                           FontSize="18"
+                           DataContext="{Binding Path=YMLCatalog.shop}" 
+                           Text="{Binding Path=url}" />
+                <ListBox Height="250" 
+                         DataContext="{Binding Path=YMLCatalog.shop}"
+                         ItemsSource="{Binding Path=categories}"
+                         />
+
+                <!--Text="{x:Bind Path=viewModel.YMLCatalog.shop.url, Mode=OneWay}"/>-->
+                    
                                        
             </StackPanel>
         </PivotItem>

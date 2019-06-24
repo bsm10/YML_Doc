@@ -3,5 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:YML_Doc">
-
+    <Application.Resources>
+        <local:yml_catalog x:Key="DesignClass"/>
+        <local:ViewModel x:Key="DesignData"/>
+    </Application.Resources>
 </Application>

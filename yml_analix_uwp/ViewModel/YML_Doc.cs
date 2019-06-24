@@ -400,35 +400,16 @@ namespace YML_Doc
     public partial class yml_catalog
     {
 
-        private yml_catalogShop shopField;
-
-        private string dateField;
-
         /// <remarks/>
-        public yml_catalogShop shop
-        {
-            get
-            {
-                return shopField;
-            }
-            set
-            {
-                shopField = value;
-            }
-        }
+        public yml_catalogShop shop { get; set; }
 
         /// <remarks/>
         [XmlAttribute()]
-        public string date
+        public string date { get; set; }
+
+        public override string ToString()
         {
-            get
-            {
-                return dateField;
-            }
-            set
-            {
-                dateField = value;
-            }
+            return shop + "Дата обновления " + date;
         }
     }
 
@@ -444,6 +425,14 @@ namespace YML_Doc
 
         /// <remarks/>
         public yml_catalogShopOffers offers { get; set; }
+
+        public override string ToString()
+        {
+            int countGoodsItem = offers.item == null ? 0 : offers.item.Length;
+            int countGoodsOffer = offers.offer == null ? 0 : offers.offer.Length;
+            int countGoods = countGoodsItem + countGoodsOffer;
+            return "Категорий - " + categories.Length + "; товаров - " + countGoods.ToString() + "; ";
+        }
     }
 
     /// <remarks/>
@@ -466,6 +455,10 @@ namespace YML_Doc
         /// <remarks/>
         [XmlText()]
         public string Value { get; set; }
+        public override string ToString()
+        {
+            return Value;
+        }
     }
 
     /// <remarks/>

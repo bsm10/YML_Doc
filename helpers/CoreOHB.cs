@@ -18,6 +18,7 @@ using static CoreOHB.Helpers.Files;
 using Windows.Storage;
 using Windows.UI.Notifications;
 using Windows.Networking.Connectivity;
+using System.Text;
 
 namespace CoreOHB
 {
@@ -347,6 +348,57 @@ namespace CoreOHB
                         connectionProfile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
             }
 
+            public async static Task DownloadYML()
+            {
+                try
+                {
+                    //***************************************************************
+                    //загружаем магазины, которые в перечислены в файле
+                    XDocument xdoc = XDocument.Load(@"DataFiles/shops-yml.xml");
+                    Uri uri;
+                    // получаем локальную папку
+                    StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+                    // создаем файл
+                    string file;
+                    StorageFile xmlFile;// = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
+                    // запись в файл
+
+                    foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
+                    {
+                        uri = new Uri(addresxml.Value);
+                        file = @"\DataFiles\" + uri.Host + ".xml";
+
+                        //StringBuilder sb = new StringBuilder();
+                        //TextWriter tr = new StringWriter(sb);
+
+                        xmlFile = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
+                        XDocument ymlCatalog = new XDocument();
+                        using (var httpclient = new HttpClient())
+                        {
+                            var response = await httpclient.GetAsync(addresxml.Value);
+                            ymlCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
+                            //ymlCatalog.Save(await response.Content.ReadAsStreamAsync());
+                        }
+                        await FileIO.WriteTextAsync(xmlFile, ymlCatalog.ToString());
+                        FileInfo fi = new FileInfo(xmlFile.Path);
+                        await LogAsync(xmlFile.Name + " - " + fi.Length.FileSizeToString());
+
+                        //ymlCatalog.Save(tr);
+                    }
+
+
+                }
+                catch (XmlException xmlEx)
+                {
+                    await LogAsync(xmlEx.Message);
+                    //MessageBox.Show(xmlEx.Message);
+                }
+                catch (Exception ex)
+                {
+                    await LogAsync(ex.Message);
+                    //MessageBox.Show(ex.Message);
+                }
+            }
         }
     }
 }
