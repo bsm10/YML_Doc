@@ -1,13 +1,15 @@
 ﻿using System;
 
 using static CoreOHB.CoreOHB;
-using static CoreOHB.Helpers;
 using static CoreOHB.Helpers.Files;
+using static CoreOHB.Helpers.NetWork;
+using static CoreOHB.Helpers.ToastNotifications;
 
 using Windows.ApplicationModel.Background;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -46,7 +48,7 @@ namespace YML_Doc
         {
             try
             {
-                if(NetWork.InternetAvailable())
+                if(InternetAvailable())
                 {
                     await UpdateOneHomeBeautyAsync(progress);
                     await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
@@ -54,7 +56,7 @@ namespace YML_Doc
             }
             catch (Exception exc)
             {
-                ToastNotifications.ShowToast("GetInfoShopAsync", exc.Message);
+                ShowToast("GetInfoShopAsync", exc.Message);
             }
         }
 
@@ -63,11 +65,11 @@ namespace YML_Doc
         {
             try
             {
-                if(NetWork.InternetAvailable())await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                if(InternetAvailable())await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
             }
             catch (Exception exc)
             {
-                ToastNotifications.ShowToast("BtnGetInfo_Tapped", exc.Message);
+                ShowToast("BtnGetInfo_Tapped", exc.Message);
             }
 
             
@@ -96,7 +98,7 @@ namespace YML_Doc
             }
             catch (Exception exc)
             {
-                ToastNotifications.ShowToast("BtnSetBackgroundTask_Tapped", exc.Message);
+                ShowToast("BtnSetBackgroundTask_Tapped", exc.Message);
             }
 
            
@@ -116,30 +118,16 @@ namespace YML_Doc
                                                                         IBackgroundTrigger trigger,
                                                                         IBackgroundCondition condition)
         {
-            //var requestStatus = await BackgroundExecutionManager.RequestAccessAsync();
-            //if (requestStatus != BackgroundAccessStatus.AlwaysAllowed)
-            //{
-            //    // Depending on the value of requestStatus, provide an appropriate response
-            //    // such as notifying the user which functionality won't work as expected
-            //}
             CheckExistTask(taskName)?.Unregister(true);
-            //cur.Value.Unregister(true);
             // Register the background task.
             var builder = new BackgroundTaskBuilder();
             builder.Name = taskName;
             builder.TaskEntryPoint = taskEntryPoint;
             builder.SetTrigger(trigger);
             // Begin adding conditions.
-            //SystemCondition userCondition = new SystemCondition(SystemConditionType.UserPresent);
             SystemCondition internetCondition = new SystemCondition(SystemConditionType.InternetAvailable);
             
-            //builder.AddCondition(userCondition);
             builder.AddCondition(internetCondition);
-
-            //if (condition != null)
-            //{
-            //    builder.AddCondition(condition);
-            //}
 
             BackgroundTaskRegistration task = builder.Register();
 
@@ -176,22 +164,22 @@ namespace YML_Doc
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            if (NetWork.InternetAvailable())
+            if (InternetAvailable())
             {
                 try
                 {
-                    await NetWork.DownloadYML();
+                    await DownloadYML(progress); 
                     await CreateLogFileAsync();
                     await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
                 }
                 catch (Exception exc)
                 {
-                    ToastNotifications.ShowToast("Page_Loaded", exc.Message);
+                    ShowToast("Page_Loaded", exc.Message);
                 }
             }
             else
             {
-                ToastNotifications.ShowToast(App.Current.ToString(), "Нет интернета! Обновления не будет!");
+                ShowToast(Application.Current.ToString(), "Нет интернета! Обновления не будет!");
             }
         }
 
@@ -245,7 +233,7 @@ namespace YML_Doc
 
         private void RestoreSettimgs()
         {
-            Object tog = localSettings.Values["showtoast"];
+            object tog = localSettings.Values["showtoast"];
             if (tog == null)
             {
                 toggleToast.IsOn = false;
@@ -254,7 +242,7 @@ namespace YML_Doc
             {
                 toggleToast.IsOn = (bool)tog;
             }
-            Object time = localSettings.Values["timeupdate"];
+            object time = localSettings.Values["timeupdate"];
             if (time != null)
             {
                 timePiker.Time = (TimeSpan)time;
@@ -269,29 +257,11 @@ namespace YML_Doc
                 toggleTask.IsOn = true;
             }
             else toggleTask.IsOn = false;
-
-            //Object task = localSettings.Values["enable_task"];
-            //if (task != null)
-            //{
-            //    toggleTask.IsOn = (bool)task;
-            //}
-            //else
-            //{
-            //    toggleTask.IsOn = false;
-            //}
-
         }
 
     }
     public class OHBShops : DependencyObject
     {
-        //public YML_Catalog Shop
-        //{
-        //    get
-        //    {
-        //        return (YML_Catalog)GetValue(ItemCo)
-        //    }
-        //}
         public int ItemCount
         {
             get { return (int)GetValue(ItemCountProperty); }

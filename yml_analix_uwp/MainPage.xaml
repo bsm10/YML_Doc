@@ -3,7 +3,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="using:YML_Doc"
     x:Class="YML_Doc.MainPage"
     mc:Ignorable="d"
     
@@ -133,9 +132,27 @@
                            Text="{Binding Path=url}" />
                 <ListBox Height="250" 
                          DataContext="{Binding Path=YMLCatalog.shop}"
-                         ItemsSource="{Binding Path=categories}"
-                         />
+                         ItemsSource="{Binding Path=categories}"/>
 
+                <SemanticZoom Height="500">
+                    <SemanticZoom.ZoomedInView>
+                        <GridView 
+                            DataContext="{Binding Path=YMLCatalog.shop}"
+                            ItemsSource="{Binding Path=categories}" 
+                            SelectionMode="None"
+                            >
+                        </GridView>
+                    </SemanticZoom.ZoomedInView>
+
+                    <SemanticZoom.ZoomedOutView>
+                        <GridView 
+                            DataContext="{Binding Path=YMLCatalog.shop}"
+                            ItemsSource="{Binding Path=categories}" 
+                            SelectionMode="None"
+                            >
+                        </GridView>
+                    </SemanticZoom.ZoomedOutView>
+                </SemanticZoom>
                 <!--Text="{x:Bind Path=viewModel.YMLCatalog.shop.url, Mode=OneWay}"/>-->
                     
                                        

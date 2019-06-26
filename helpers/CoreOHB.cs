@@ -11,14 +11,13 @@ using System.Xml.Linq;
 using FluentFTP;
 
 using Microsoft.Toolkit.Uwp.Notifications;
-
-using static CoreOHB.Helpers;
 using static CoreOHB.Helpers.Files;
+using static CoreOHB.Helpers.NetWork;
+using static CoreOHB.Helpers.ToastNotifications;
 
+using Windows.Networking.Connectivity;
 using Windows.Storage;
 using Windows.UI.Notifications;
-using Windows.Networking.Connectivity;
-using System.Text;
 
 namespace CoreOHB
 {
@@ -62,7 +61,7 @@ namespace CoreOHB
                 await client.UploadFileAsync(xmlFile.Path, "/www/files/onehomebeauty.xml");
                 if((bool)localSettings.Values["showtoast"]==true)
                 {
-                    ToastNotifications.ShowToast("One Home Beauty", DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " - Updated onehomebeauty.xml");
+                    ShowToast("One Home Beauty", DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " - Updated onehomebeauty.xml");
                 }
                 
                 await LogAsync("uploaded!");
@@ -200,7 +199,7 @@ namespace CoreOHB
         {
 
             // Проверяем есть ли подключение к интернету
-            if (NetWork.InternetAvailable())
+            if (InternetAvailable())
             {
                 await GetShopsAsync(progress);
                 await SaveXml();
@@ -212,6 +211,7 @@ namespace CoreOHB
             }
         }
     }
+
     public static class Helpers
     {
         public static class ToastNotifications
@@ -328,7 +328,7 @@ namespace CoreOHB
                 catch (Exception e)
                 {
                     string s = e.Message + "\r\n" + e.HelpLink + "\r\n";
-                    ToastNotifications.ShowToast("Error", s);
+                    ShowToast("Error", s);
                 }
 
             }
@@ -348,7 +348,11 @@ namespace CoreOHB
                         connectionProfile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
             }
 
-            public async static Task DownloadYML()
+            /// <summary>
+            /// Загружает магазины в xml формате на диск
+            /// </summary>
+            /// <returns></returns>
+            public static async Task DownloadYML(IProgress<string> progress)
             {
                 try
                 {
@@ -368,19 +372,17 @@ namespace CoreOHB
                         uri = new Uri(addresxml.Value);
                         file = @"\DataFiles\" + uri.Host + ".xml";
 
-                        //StringBuilder sb = new StringBuilder();
-                        //TextWriter tr = new StringWriter(sb);
-
                         xmlFile = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
                         XDocument ymlCatalog = new XDocument();
+                        progress.Report("Загрузка - " + uri.ToString());
                         using (var httpclient = new HttpClient())
                         {
                             var response = await httpclient.GetAsync(addresxml.Value);
                             ymlCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
-                            //ymlCatalog.Save(await response.Content.ReadAsStreamAsync());
                         }
                         await FileIO.WriteTextAsync(xmlFile, ymlCatalog.ToString());
                         FileInfo fi = new FileInfo(xmlFile.Path);
+                        progress.Report("Ок - " + fi.Length.FileSizeToString());
                         await LogAsync(xmlFile.Name + " - " + fi.Length.FileSizeToString());
 
                         //ymlCatalog.Save(tr);
@@ -390,11 +392,13 @@ namespace CoreOHB
                 }
                 catch (XmlException xmlEx)
                 {
+                    progress.Report(xmlEx.Message);
                     await LogAsync(xmlEx.Message);
                     //MessageBox.Show(xmlEx.Message);
                 }
                 catch (Exception ex)
                 {
+                    progress.Report(ex.Message);
                     await LogAsync(ex.Message);
                     //MessageBox.Show(ex.Message);
                 }
