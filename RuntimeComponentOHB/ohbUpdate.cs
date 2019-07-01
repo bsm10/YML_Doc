@@ -1,4 +1,4 @@
-﻿using static CoreOHB.CoreOHB;
+﻿using static CoreOHB.Core;
 
 using Windows.ApplicationModel.Background;
 

@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using FluentFTP;
 
 using Microsoft.Toolkit.Uwp.Notifications;
+
 using static CoreOHB.Helpers.Files;
 using static CoreOHB.Helpers.NetWork;
 using static CoreOHB.Helpers.ToastNotifications;
@@ -21,7 +22,7 @@ using Windows.UI.Notifications;
 
 namespace CoreOHB
 {
-    public static class CoreOHB
+    public static class Core
     {
         static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         private static readonly string file = @"\DataFiles\onehomebeauty.xml";
@@ -42,7 +43,9 @@ namespace CoreOHB
 
 
         private static XElement shopTree;//Корневой узел, который содержит все магазины
+        private static IEnumerable<XElement> excludesShopTree;//Collection, который содержит исключения которые не надо импортировать
         private static XDocument shopXML;//XML, который содержит все магазины
+        private static XDocument excludesShopXML;//XML, который содержит исключения которые не надо импортировать
 
         private static StorageFile xmlFile;
 
@@ -109,7 +112,6 @@ namespace CoreOHB
                     var response = await httpclient.GetAsync(url_shop);
                     xYMLCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
                 }
-                //xYMLCatalog = XDocument.Load(url_shop);
                 //список категорий
                 IEnumerable<XElement> xCategories = xYMLCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements(category);
 
@@ -133,6 +135,30 @@ namespace CoreOHB
             }
             //return null;
         }
+        private static async Task<IEnumerable<XElement>> LoadShopExcludesAsync()
+        {
+            try
+            {
+                //***************************************************************
+                //загружаем магазин
+                XDocument xDoc;
+                using (var httpclient = new HttpClient())
+                {
+                    var response = await httpclient.GetAsync("http://tks.pl.ua/files/excludes.xml");
+                    xDoc = XDocument.Load(await response.Content.ReadAsStreamAsync());
+                }
+                return xDoc.Element("Excludes").Elements();
+            }
+            catch (XmlException xmlEx)
+            {
+                await LogAsync(xmlEx.Message);
+            }
+            catch (Exception ex)
+            {
+                await LogAsync(ex.Message);
+            }
+            return null;
+        }
 
         private static async Task GetShopsAsync(IProgress<string> progress)
         {
@@ -142,12 +168,17 @@ namespace CoreOHB
                 XDocument xdoc = XDocument.Load(@"DataFiles/shops-yml.xml");
                 int countshops = xdoc.Element("shops-yml").Elements().Count();
                 string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+
+                //загружаем список исключений - товары, которые исключаются из общего файла
+                excludesShopTree = await LoadShopExcludesAsync();
+
                 //строим структуру основного файла
                 shopTree =
                     new XElement(yml_catalog, new XAttribute(date, time_update),
                         new XElement(shop,
                             new XElement(categories),
                             new XElement(offers)));
+
                 //добавляем в корень категории и товары
                 foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
                 {
@@ -211,12 +242,11 @@ namespace CoreOHB
             }
         }
     }
-
-    public static class Helpers
+    namespace Helpers
     {
         public static class ToastNotifications
         {
-            public static void ShowToast(string title, string content, string image ="", string logo="")
+            public static void ShowToast(string title, string content, string image = "", string logo = "")
             {
                 // In a real app, these would be initialized with actual data
                 //string title = "Andrew sent you a picture";
@@ -267,7 +297,6 @@ namespace CoreOHB
             private readonly static string logFileName = "update.log";
             public static StorageFolder localFolder = ApplicationData.Current.LocalFolder;
             public static StorageFile LogFile { get; set; }
-
             public static async Task LogAsync(string text)
             {
                 try
@@ -287,7 +316,7 @@ namespace CoreOHB
                         await FileIO.WriteTextAsync(logFile, DateTime.Now.ToString("yyyy-MM-dd HH:mm - ") + text + "\r\n");
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     await LogAsync(e.Message);
                 }
@@ -332,8 +361,6 @@ namespace CoreOHB
                 }
 
             }
-
-
         }
         public static class NetWork
         {
@@ -365,7 +392,7 @@ namespace CoreOHB
                     // создаем файл
                     string file;
                     StorageFile xmlFile;// = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
-                    // запись в файл
+                                        // запись в файл
 
                     foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
                     {

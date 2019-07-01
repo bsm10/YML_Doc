@@ -1,6 +1,6 @@
 ﻿using System;
 
-using static CoreOHB.CoreOHB;
+using static CoreOHB.Core;
 using static CoreOHB.Helpers.Files;
 using static CoreOHB.Helpers.NetWork;
 using static CoreOHB.Helpers.ToastNotifications;
@@ -9,7 +9,6 @@ using Windows.ApplicationModel.Background;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
