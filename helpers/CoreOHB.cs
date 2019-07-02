@@ -43,7 +43,7 @@ namespace CoreOHB
 
 
         private static XElement shopTree;//Корневой узел, который содержит все магазины
-        private static IEnumerable<XElement> excludesShopTree;//Collection, который содержит исключения которые не надо импортировать
+        private static IEnumerable<XElement> excludesGoods;//Collection, который содержит исключения которые не надо импортировать
         private static XDocument shopXML;//XML, который содержит все магазины
         private static XDocument excludesShopXML;//XML, который содержит исключения которые не надо импортировать
 
@@ -116,10 +116,22 @@ namespace CoreOHB
                 IEnumerable<XElement> xCategories = xYMLCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements(category);
 
                 //добавляем Категории и Товары в общее дерево
+
+                //загружаем список исключений - товары, которые исключаются из общего файла
+                excludesGoods = await LoadShopExcludesAsync();
+                IEnumerable<XElement> allGoods = xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements();
+                IEnumerable<XElement> ohbGoods = allGoods.Except(excludesGoods, new GoodsComparer());
+
+                //if(allGoods.Count()!= ohbGoods.Count())
+                //{
+                //    var x = excludesGoods.Count();
+                //}
                 shopTree.Element(shop).Element(categories).Add(xYMLCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements());
-                shopTree.Element(shop).Element(offers).Add(xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements());
+                shopTree.Element(shop).Element(offers).Add(ohbGoods);
+
                 //список товаров
                 IEnumerable<XElement> xOffers = xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements();
+
                 XAttribute xCatalogAttribute = xYMLCatalog.Element(yml_catalog).Attribute(date);
                 DateTime lastUpdate = DateTime.Parse(xCatalogAttribute.Value);//дата последнего обновления
             }
@@ -134,6 +146,34 @@ namespace CoreOHB
                 //MessageBox.Show(ex.Message);
             }
             //return null;
+        }
+        // Custom comparer for the Product class
+        class GoodsComparer : IEqualityComparer<XElement>
+        {
+            // Products are equal if their names and product categories are equal.
+            public bool Equals(XElement x, XElement y)
+            {
+                return x.Attribute("id").Value == y.Attribute("id").Value && x.Element("categoryId").Value == y.Element("categoryId").Value;
+            }
+
+            // If Equals() returns true for a pair of objects 
+            // then GetHashCode() must return the same value for these objects.
+
+            public int GetHashCode(XElement product)
+            {
+                //Check whether the object is null
+                if (object.ReferenceEquals(product, null)) return 0;
+
+                //Get hash code for the Name field if it is not null.
+                int hashProductName = product.Value == null ? 0 : product.Value.GetHashCode();
+
+                //Get hash code for the Code field.
+                int hashProductCode = product.Value.GetHashCode();
+
+                //Calculate the hash code for the product.
+                return hashProductName ^ hashProductCode;
+            }
+
         }
         private static async Task<IEnumerable<XElement>> LoadShopExcludesAsync()
         {
@@ -169,9 +209,6 @@ namespace CoreOHB
                 int countshops = xdoc.Element("shops-yml").Elements().Count();
                 string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
 
-                //загружаем список исключений - товары, которые исключаются из общего файла
-                excludesShopTree = await LoadShopExcludesAsync();
-
                 //строим структуру основного файла
                 shopTree =
                     new XElement(yml_catalog, new XAttribute(date, time_update),
@@ -186,8 +223,18 @@ namespace CoreOHB
                     await LoadShopAsync(addresxml.Value);
                     progress?.Report("Done!");
                 }
+
                 shopXML = new XDocument();
+
+                ////загружаем список исключений - товары, которые исключаются из общего файла
+                //excludesGoods = await LoadShopExcludesAsync();
+                //IEnumerable<XElement> allGoods = shopTree.Element(shop).Element(offers).Elements(); 
+                //IEnumerable<XElement> ohbGoods = allGoods.Except(excludesGoods);
+                //shopTree.Element(shop).Element(offers).Nodes. .Add(ohbGoods);
+
                 shopXML.Add(shopTree);
+
+                //shopXML.Add(shopTree);
             }
             catch (Exception e)
             {
