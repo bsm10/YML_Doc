@@ -1,5 +1,4 @@
 ﻿using System;
-
 using static CoreOHB.Core;
 using static CoreOHB.Helpers.Files;
 using static CoreOHB.Helpers.NetWork;
@@ -47,11 +46,8 @@ namespace YML_Doc
         {
             try
             {
-                if(InternetAvailable())
-                {
-                    await UpdateOneHomeBeautyAsync(progress);
-                    await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
-                }
+                await UpdateOneHomeBeautyAsync(progress);
+                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
             }
             catch (Exception exc)
             {
@@ -147,20 +143,6 @@ namespace YML_Doc
             return null;
         }
 
-        private void BtnUnregBackgroundTask_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
-        {
-            BackgroundTaskRegistration bk = CheckExistTask(taskName);
-            if(bk!=null)
-            {
-                bk.Unregister(true);
-                txtStatus.Text += "Background Task " + taskName + " unregistered! \r\n";
-            }
-            else
-            {
-                txtStatus.Text += "Background Task " + taskName + " is null! \r\n";
-            }
-        }
-
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             if (InternetAvailable())
@@ -208,7 +190,7 @@ namespace YML_Doc
         ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         private void ToggleToast_LostFocus(object sender, RoutedEventArgs e)
         {
-            localSettings.Values["showtoast"] = toggleToast.IsOn;
+           
         }
 
         private void ToggleTask_LostFocus(object sender, RoutedEventArgs e)
@@ -228,6 +210,11 @@ namespace YML_Doc
             {
                 bk.Unregister(true);
             }
+        }
+
+        private void ToggleToast_Toggled(object sender, RoutedEventArgs e)
+        {
+            localSettings.Values["showtoast"] = toggleToast.IsOn;
         }
 
         private void RestoreSettimgs()

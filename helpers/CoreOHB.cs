@@ -26,7 +26,6 @@ namespace CoreOHB
     {
         static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         private static readonly string file = @"\DataFiles\onehomebeauty.xml";
-
         static readonly XName yml_catalog = "yml_catalog";
         static readonly XName shop = "shop";
         static readonly XName offers = "offers";
@@ -43,11 +42,14 @@ namespace CoreOHB
 
 
         private static XElement shopTree;//Корневой узел, который содержит все магазины
-        private static IEnumerable<XElement> excludesGoods;//Collection, который содержит исключения которые не надо импортировать
+        private static IEnumerable<XElement> ExcludesGoods;//Collection, который содержит исключения которые не надо импортировать
+        public static IEnumerable<XElement> ListShopXML;//Collection, который содержит список магазинов
         private static XDocument shopXML;//XML, который содержит все магазины
-        private static XDocument excludesShopXML;//XML, который содержит исключения которые не надо импортировать
+        //private static XDocument excludesShopXML;//XML, который содержит исключения которые не надо импортировать
 
         private static StorageFile xmlFile;
+
+        public static string UrlShopsXMLFile { get; } = @"http://tks.pl.ua/files/shops-yml.xml";
 
         private static async Task UploadShopAsync()
         {
@@ -118,9 +120,9 @@ namespace CoreOHB
                 //добавляем Категории и Товары в общее дерево
 
                 //загружаем список исключений - товары, которые исключаются из общего файла
-                excludesGoods = await LoadShopExcludesAsync();
+                ExcludesGoods = await LoadShopExcludesAsync();
                 IEnumerable<XElement> allGoods = xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements();
-                IEnumerable<XElement> ohbGoods = allGoods.Except(excludesGoods, new GoodsComparer());
+                IEnumerable<XElement> ohbGoods = allGoods.Except(ExcludesGoods, new GoodsComparer());
 
                 //if(allGoods.Count()!= ohbGoods.Count())
                 //{
@@ -138,12 +140,10 @@ namespace CoreOHB
             catch (XmlException xmlEx)
             {
                 await LogAsync(xmlEx.Message);
-                //MessageBox.Show(xmlEx.Message);
             }
             catch (Exception ex)
             {
                 await LogAsync(ex.Message);
-                //MessageBox.Show(ex.Message);
             }
             //return null;
         }
@@ -205,8 +205,7 @@ namespace CoreOHB
             try
             {
                 //загружаем список магазинов
-                XDocument xdoc = XDocument.Load(@"DataFiles/shops-yml.xml");
-                int countshops = xdoc.Element("shops-yml").Elements().Count();
+                int countshops = ListShopXML.Count();
                 string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
 
                 //строим структуру основного файла
@@ -217,7 +216,7 @@ namespace CoreOHB
                             new XElement(offers)));
 
                 //добавляем в корень категории и товары
-                foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
+                foreach (XElement addresxml in ListShopXML)
                 {
                     progress?.Report("Loading " + addresxml.Value + "...");
                     await LoadShopAsync(addresxml.Value);
@@ -226,15 +225,7 @@ namespace CoreOHB
 
                 shopXML = new XDocument();
 
-                ////загружаем список исключений - товары, которые исключаются из общего файла
-                //excludesGoods = await LoadShopExcludesAsync();
-                //IEnumerable<XElement> allGoods = shopTree.Element(shop).Element(offers).Elements(); 
-                //IEnumerable<XElement> ohbGoods = allGoods.Except(excludesGoods);
-                //shopTree.Element(shop).Element(offers).Nodes. .Add(ohbGoods);
-
                 shopXML.Add(shopTree);
-
-                //shopXML.Add(shopTree);
             }
             catch (Exception e)
             {
@@ -279,6 +270,7 @@ namespace CoreOHB
             // Проверяем есть ли подключение к интернету
             if (InternetAvailable())
             {
+                ListShopXML = await LoadListShopsAsync();
                 await GetShopsAsync(progress);
                 await SaveXml();
                 await UploadShopAsync();
@@ -431,17 +423,17 @@ namespace CoreOHB
                 try
                 {
                     //***************************************************************
-                    //загружаем магазины, которые в перечислены в файле
-                    XDocument xdoc = XDocument.Load(@"DataFiles/shops-yml.xml");
-                    Uri uri;
+
                     // получаем локальную папку
                     StorageFolder localFolder = ApplicationData.Current.LocalFolder;
                     // создаем файл
                     string file;
                     StorageFile xmlFile;// = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
                                         // запись в файл
-
-                    foreach (XElement addresxml in xdoc.Element("shops-yml").Descendants())
+                    Uri uri;
+                    //загружаем магазины, которые в перечислены в файле
+                    Core.ListShopXML = await LoadListShopsAsync();
+                    foreach (XElement addresxml in Core.ListShopXML)
                     {
                         uri = new Uri(addresxml.Value);
                         file = @"\DataFiles\" + uri.Host + ".xml";
@@ -461,8 +453,6 @@ namespace CoreOHB
 
                         //ymlCatalog.Save(tr);
                     }
-
-
                 }
                 catch (XmlException xmlEx)
                 {
@@ -476,6 +466,18 @@ namespace CoreOHB
                     await LogAsync(ex.Message);
                     //MessageBox.Show(ex.Message);
                 }
+            }
+
+            public static async Task<IEnumerable<XElement>> LoadListShopsAsync()
+            {
+                XDocument result;
+                using (var httpclient = new HttpClient())
+                {
+                    var response = await httpclient.GetAsync(Core.UrlShopsXMLFile);
+                    result = XDocument.Load(await response.Content.ReadAsStreamAsync());
+                }
+                
+                return result.Element("shops-yml").Descendants(); 
             }
         }
     }

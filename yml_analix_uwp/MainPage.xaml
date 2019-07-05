@@ -25,12 +25,11 @@
                 <StackPanel Margin="10,50,10,10" Grid.Row="0" Grid.ColumnSpan="2">
                     <Button x:Name="btnUpdate" 
                     Height="50" 
-                    Content="Update" 
-                    Tapped="BtnUpdate_Tapped"
+                    Content="Update"
                     Background="#7F06FF3F"
                     HorizontalAlignment="Stretch"
                     Margin="10,5,10,5"
-                    VerticalAlignment="Center"/>
+                    VerticalAlignment="Center" Tapped="BtnUpdate_Tapped"/>
                     <Button x:Name="btnGetInfo" 
                     Height="50" 
                     Content="GetInfo" 
@@ -99,13 +98,14 @@
                         <ToggleSwitch x:Name="toggleTask"
                                       Grid.Row="0" Grid.Column="1"
                                       AutomationProperties.Name="task ToggleSwitch"
-                                      Margin="10,10,10,10" LostFocus="ToggleTask_LostFocus" Toggled="ToggleTask_Toggled" />
+                                      Margin="10,10,10,10"
+                                      Toggled="ToggleTask_Toggled" />
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Show toast" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,5,10,5" />
                         <ToggleSwitch x:Name="toggleToast"
                                       Grid.Row="1" Grid.Column="1"
                                       AutomationProperties.Name="toast ToggleSwitch"
-                                      Margin="10,10,10,10" LostFocus="ToggleToast_LostFocus"/>
+                                      Margin="10,10,10,10" Toggled="ToggleToast_Toggled"/>
                     </Grid>
 
                 </StackPanel>
