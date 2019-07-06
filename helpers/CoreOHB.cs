@@ -88,10 +88,21 @@ namespace CoreOHB
             {
                 // получаем локальную папку
                 StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-                // создаем файл
-                xmlFile = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
-                // запись в файл
-                await FileIO.WriteTextAsync(xmlFile, shopTree.ToString());
+                
+                using (StreamWriter sw = File.CreateText(localFolder.Path + file))
+                {
+                    shopTree.Save(sw);
+                }
+
+                xmlFile = await localFolder.GetFileAsync(file);
+                //// создаем файл
+                //xmlFile = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
+                //// запись в файл
+                ////xmlFile.OpenStreamForWriteAsync
+
+                //await FileIO.WriteTextAsync(xmlFile, shopTree.ToString());
+
+
                 FileInfo fi = new FileInfo(xmlFile.Path);
                 await LogAsync(xmlFile.Name + " - " + fi.Length.FileSizeToString());
             }
