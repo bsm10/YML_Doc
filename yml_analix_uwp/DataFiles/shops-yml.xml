@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <shops-yml>
   <yml>https://podarki.top/prom/top_group.xml</yml>
-  <yml>https://admin.newtrend.team/media/export/PlatformaAvailFalse.xml</yml>
-  <yml>https://sweetpass.prom.ua/yandex_market.xml?hash_tag=10cda165109a7f6f83310c4e5aaeeef9&amp;sales_notes=&amp;product_ids=&amp;group_ids=&amp;label_ids=&amp;exclude_fields=&amp;html_description=0&amp;yandex_cpa=&amp;process_presence_sure=</yml>
+  <yml>ftp://titan.dobrom.com/Platok.xml</yml>
+  <yml>https://admin.newtrend.team/media/export/Platforma.xml</yml>
+  <yml>http://onebeauty.com.ua/files/ohb_yml.xml</yml>
 </shops-yml>
 

@@ -1,9 +1,8 @@
 ﻿using System;
-using static CoreOHB.Core;
 using static CoreOHB.Helpers.Files;
-using static CoreOHB.Helpers.NetWork;
 using static CoreOHB.Helpers.ToastNotifications;
-
+using static CoreOHB.Helpers.NetWork;
+using static CoreOHB.Core;
 using Windows.ApplicationModel.Background;
 using Windows.Storage;
 using Windows.UI.Xaml;
@@ -47,7 +46,7 @@ namespace YML_Doc
             try
             {
                 await UpdateOneHomeBeautyAsync(progress);
-                await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                await GetInfoShopAsync(FolderOHB_Remote + FileOHB_Shop);
             }
             catch (Exception exc)
             {
@@ -60,7 +59,7 @@ namespace YML_Doc
         {
             try
             {
-                if(InternetAvailable())await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                if(InternetAvailable())await GetInfoShopAsync(FolderOHB_Remote + FileOHB_Shop);
             }
             catch (Exception exc)
             {
@@ -145,13 +144,22 @@ namespace YML_Doc
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            TreeViewNode rootNode = new TreeViewNode() { Content = "Flavors" };
+            rootNode.IsExpanded = true;
+            rootNode.Children.Add(new TreeViewNode() { Content = "Vanilla" });
+            rootNode.Children.Add(new TreeViewNode() { Content = "Strawberry" });
+            rootNode.Children.Add(new TreeViewNode() { Content = "Chocolate" });
+
+            treeViewOHB.RootNodes.Add(rootNode);
+
             if (InternetAvailable())
             {
                 try
                 {
-                    await DownloadYML(progress); 
+                    //await DownloadYML(progress);
+                    await UpdateOneHomeBeautyAsync(progress);
                     await CreateLogFileAsync();
-                    await GetInfoShopAsync("http://tks.pl.ua/files/onehomebeauty.xml", progress);
+                    await GetInfoShopAsync(FolderOHB_Remote + FileOHB_Shop);
                 }
                 catch (Exception exc)
                 {

@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Windows10version1803="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 6)"
     x:Class="YML_Doc.MainPage"
     mc:Ignorable="d"
     
@@ -29,7 +30,8 @@
                     Background="#7F06FF3F"
                     HorizontalAlignment="Stretch"
                     Margin="10,5,10,5"
-                    VerticalAlignment="Center" Tapped="BtnUpdate_Tapped"/>
+                    VerticalAlignment="Center" 
+                    Tapped="BtnUpdate_Tapped"/>
                     <Button x:Name="btnGetInfo" 
                     Height="50" 
                     Content="GetInfo" 
@@ -106,6 +108,9 @@
                                       Grid.Row="1" Grid.Column="1"
                                       AutomationProperties.Name="toast ToggleSwitch"
                                       Margin="10,10,10,10" Toggled="ToggleToast_Toggled"/>
+                        <Windows10version1803:TreeView>
+                            <!--здесь можно тривиев сделать-->
+                        </Windows10version1803:TreeView>
                     </Grid>
 
                 </StackPanel>
@@ -130,30 +135,13 @@
                            FontSize="18"
                            DataContext="{Binding Path=YMLCatalog.shop}" 
                            Text="{Binding Path=url}" />
+                
+                <Windows10version1803:TreeView x:Name="treeViewOHB"/>
+                    
                 <ListBox Height="250" 
                          DataContext="{Binding Path=YMLCatalog.shop}"
                          ItemsSource="{Binding Path=categories}"/>
 
-                <SemanticZoom Height="500">
-                    <SemanticZoom.ZoomedInView>
-                        <GridView 
-                            DataContext="{Binding Path=YMLCatalog.shop}"
-                            ItemsSource="{Binding Path=categories}" 
-                            SelectionMode="None"
-                            >
-                        </GridView>
-                    </SemanticZoom.ZoomedInView>
-
-                    <SemanticZoom.ZoomedOutView>
-                        <GridView 
-                            DataContext="{Binding Path=YMLCatalog.shop}"
-                            ItemsSource="{Binding Path=categories}" 
-                            SelectionMode="None"
-                            >
-                        </GridView>
-                    </SemanticZoom.ZoomedOutView>
-                </SemanticZoom>
-                <!--Text="{x:Bind Path=viewModel.YMLCatalog.shop.url, Mode=OneWay}"/>-->
                     
                                        
             </StackPanel>

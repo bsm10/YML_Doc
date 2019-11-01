@@ -7,7 +7,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-
+using System.Text;
+using Windows.Storage;
+using Windows.UI.Xaml.Controls;
 using FluentFTP;
 
 using Microsoft.Toolkit.Uwp.Notifications;
@@ -17,10 +19,10 @@ using static CoreOHB.Helpers.NetWork;
 using static CoreOHB.Helpers.ToastNotifications;
 
 using Windows.Networking.Connectivity;
-using Windows.Storage;
 using Windows.UI.Notifications;
+using CoreOHB.Helpers;
 
-namespace CoreOHB
+namespace CoreOHB //.OldCore
 {
     public static class Core
     {
@@ -45,11 +47,13 @@ namespace CoreOHB
         private static IEnumerable<XElement> ExcludesGoods;//Collection, который содержит исключения которые не надо импортировать
         public static IEnumerable<XElement> ListShopXML;//Collection, который содержит список магазинов
         private static XDocument shopXML;//XML, который содержит все магазины
-        //private static XDocument excludesShopXML;//XML, который содержит исключения которые не надо импортировать
+                                         //private static XDocument excludesShopXML;//XML, который содержит исключения которые не надо импортировать
 
-        private static StorageFile xmlFile;
+        private static TreeView tw;
 
-        public static string UrlShopsXMLFile { get; } = @"http://tks.pl.ua/files/shops-yml.xml";
+        private static StorageFile xmlFile; //сюда записывается итоговый файл магазина (на диске локально)
+        static IProgress<string> progress = null;
+
 
         private static async Task UploadShopAsync()
         {
@@ -57,18 +61,22 @@ namespace CoreOHB
             {
                 FtpClient client = new FtpClient
                 {
-                    Host = "elchukof.ftp.tools",
-                    Credentials = new NetworkCredential("elchukof_tks", "gAdP6K51mMh9")
+                    Host = "ftp://ftp.s51.freehost.com.ua/",
+                    Credentials = new NetworkCredential("granitmar1_ohbed", "Va3NeMHzyY")
                 };
-                //client.Connect();
-                //client.UploadFile(xmlFile.Path, "/www/files/onehomebeauty.xml");
                 await client.ConnectAsync();
-                await client.UploadFileAsync(xmlFile.Path, "/www/files/onehomebeauty.xml");
-                if((bool)localSettings.Values["showtoast"]==true)
+                string newFileName = Path.GetFileNameWithoutExtension(FileOHB_Shop)
+                                     + DateTime.Now.ToString("dd-MM-yyyy HH:mm") + Path.GetExtension(FileOHB_Shop);
+                if (await client.FileExistsAsync(FileOHB_Shop))
+                {
+                    await client.RenameAsync(FileOHB_Shop, newFileName);
+                }
+                await client.UploadFileAsync(xmlFile.Path, FileOHB_Shop);
+                if ((bool)localSettings.Values["showtoast"] == true)
                 {
                     ShowToast("One Home Beauty", DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " - Updated onehomebeauty.xml");
                 }
-                
+
                 await LogAsync("uploaded!");
             }
             catch (Exception ex)
@@ -81,6 +89,28 @@ namespace CoreOHB
             }
 
         }
+        //public static async Task UploadShopAsync(string fileName)
+        //{
+        //    try
+        //    {
+        //        string file = Path.GetFileName(fileName);
+        //        await LogAsync($"Uploading {file} to ftp..."); 
+        //        using (WebClient client = new WebClient())
+        //        {
+        //            client.Credentials = new NetworkCredential("granitmar1_ohbed", "Va3NeMHzyY");
+        //            byte[] responseArray = await client.UploadFileTaskAsync("ftp://ftp.s51.freehost.com.ua/" + file,
+        //                                                                    "STOR",
+        //                                                                    Path.Combine(Files.FolderOHB_Local, file));
+        //            await LogAsync(Encoding.Default.GetString(responseArray) == "" ? "Ok!" :
+        //                             Encoding.Default.GetString(responseArray));
+        //        }
+        //        //Report($"Ok!");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        await LogAsync(ex.Message);
+        //    }
+        //}
 
         private static async Task SaveXml()
         {
@@ -88,20 +118,13 @@ namespace CoreOHB
             {
                 // получаем локальную папку
                 StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-                
+
                 using (StreamWriter sw = File.CreateText(localFolder.Path + file))
                 {
                     shopTree.Save(sw);
                 }
 
                 xmlFile = await localFolder.GetFileAsync(file);
-                //// создаем файл
-                //xmlFile = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
-                //// запись в файл
-                ////xmlFile.OpenStreamForWriteAsync
-
-                //await FileIO.WriteTextAsync(xmlFile, shopTree.ToString());
-
 
                 FileInfo fi = new FileInfo(xmlFile.Path);
                 await LogAsync(xmlFile.Name + " - " + fi.Length.FileSizeToString());
@@ -112,52 +135,88 @@ namespace CoreOHB
             }
         }
 
-        private static async Task LoadShopAsync(string url_shop)
+        private static  Task<XDocument> LoadShopAsync(string url_shop)
         {
-            try
+            return Task.Run(async () =>
             {
-                //***************************************************************
-                //загружаем магазин
-                Uri uri = new Uri(url_shop);
-                XDocument xYMLCatalog;
-                using (var httpclient = new HttpClient())
+                try
                 {
-                    var response = await httpclient.GetAsync(url_shop);
-                    xYMLCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
+                    //***************************************************************
+                    //загружаем магазин
+                    Uri uri = new Uri(url_shop);
+                    XDocument xYMLCatalog;
+
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    
+                    Encoding encoding;
+                    if (url_shop.Contains("Platok"))
+                    {
+                        encoding = Encoding.GetEncoding("windows-1251");
+                        IFtpClient f = new FtpClient();
+                        f.Host = uri.Host;
+                        xYMLCatalog = GetXDocFromStream(encoding, f.OpenRead(uri.LocalPath));
+                    }
+                    else
+                    {
+                        encoding = Encoding.GetEncoding("utf-8");
+                        using (var httpclient = new HttpClient())
+                        {
+                            var response = await httpclient.GetAsync(url_shop);
+                            xYMLCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
+                        }
+
+                        //WebRequest request = WebRequest.Create(url_shop);
+                        //using (WebResponse response = await request.GetResponseAsync())
+                        //{
+                        //    xYMLCatalog = GetXDocFromStream(encoding, response.GetResponseStream());
+                        //}
+                    }
+
+                    //список категорий
+                    IEnumerable<XElement> xCategories = xYMLCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements(category);
+
+                    //добавляем Категории и Товары в общее дерево
+
+                    //загружаем список исключений - товары, которые исключаются из общего файла
+                    ExcludesGoods = await LoadShopExcludesAsync();
+                    IEnumerable<XElement> allGoods = xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements();
+                    IEnumerable<XElement> ohbGoods = allGoods.Except(ExcludesGoods, new GoodsComparer());
+
+                    shopTree.Element(shop).Element(categories).Add(xYMLCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements());
+                    shopTree.Element(shop).Element(offers).Add(ohbGoods);
+
+                    //список товаров
+                    IEnumerable<XElement> xOffers = xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements();
+
+                    XAttribute xCatalogAttribute = xYMLCatalog.Element(yml_catalog).Attribute(date);
+                    DateTime lastUpdate = DateTime.Parse(xCatalogAttribute.Value);//дата последнего обновления
+                    return xYMLCatalog;
                 }
-                //список категорий
-                IEnumerable<XElement> xCategories = xYMLCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements(category);
-
-                //добавляем Категории и Товары в общее дерево
-
-                //загружаем список исключений - товары, которые исключаются из общего файла
-                ExcludesGoods = await LoadShopExcludesAsync();
-                IEnumerable<XElement> allGoods = xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements();
-                IEnumerable<XElement> ohbGoods = allGoods.Except(ExcludesGoods, new GoodsComparer());
-
-                //if(allGoods.Count()!= ohbGoods.Count())
-                //{
-                //    var x = excludesGoods.Count();
-                //}
-                shopTree.Element(shop).Element(categories).Add(xYMLCatalog.Element(yml_catalog).Element(shop).Element(categories).Elements());
-                shopTree.Element(shop).Element(offers).Add(ohbGoods);
-
-                //список товаров
-                IEnumerable<XElement> xOffers = xYMLCatalog.Element(yml_catalog).Element(shop).Element(offers).Elements();
-
-                XAttribute xCatalogAttribute = xYMLCatalog.Element(yml_catalog).Attribute(date);
-                DateTime lastUpdate = DateTime.Parse(xCatalogAttribute.Value);//дата последнего обновления
+                catch (XmlException xmlEx)
+                {
+                    await LogAsync(xmlEx.Message);
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    await LogAsync(ex.Message);
+                    return null;
+                }
             }
-            catch (XmlException xmlEx)
-            {
-                await LogAsync(xmlEx.Message);
-            }
-            catch (Exception ex)
-            {
-                await LogAsync(ex.Message);
-            }
-            //return null;
+            );
         }
+
+        private static XDocument GetXDocFromStream(Encoding encoding, Stream stream)
+        {
+            XDocument xYMLCatalog;
+            using (StreamReader reader = new StreamReader(stream, encoding))
+            {
+                xYMLCatalog = XDocument.Load(reader);
+            }
+
+            return xYMLCatalog;
+        }
+
         // Custom comparer for the Product class
         class GoodsComparer : IEqualityComparer<XElement>
         {
@@ -195,7 +254,7 @@ namespace CoreOHB
                 XDocument xDoc;
                 using (var httpclient = new HttpClient())
                 {
-                    var response = await httpclient.GetAsync("http://tks.pl.ua/files/excludes.xml");
+                    var response = await httpclient.GetAsync(FolderOHB_Remote + "excludes.xml");
                     xDoc = XDocument.Load(await response.Content.ReadAsStreamAsync());
                 }
                 return xDoc.Element("Excludes").Elements();
@@ -211,7 +270,7 @@ namespace CoreOHB
             return null;
         }
 
-        private static async Task GetShopsAsync(IProgress<string> progress)
+        private static async Task GetShopsAsync()
         {
             try
             {
@@ -227,24 +286,66 @@ namespace CoreOHB
                             new XElement(offers)));
 
                 //добавляем в корень категории и товары
-                foreach (XElement addresxml in ListShopXML)
-                {
-                    progress?.Report("Loading " + addresxml.Value + "...");
-                    await LoadShopAsync(addresxml.Value);
-                    progress?.Report("Done!");
-                }
-
+                //foreach (XElement addresxml in ListShopXML)
+                //{
+                //    progress?.Report("Loading " + addresxml.Value + "...");
+                //    await LoadShopAsync(addresxml.Value);
+                //    progress?.Report("Done!");
+                //}
                 shopXML = new XDocument();
+                int count = ListShopXML.Count();
+                Task<XDocument>[] tasks = new Task<XDocument>[count];
+                int i = 0;
+                foreach (XElement addresxml in ListShopXML) 
+                {
+                    progress?.Report("Start loading " + addresxml.Value + "...");
+                    tasks[i] = LoadShopAsync(addresxml.Value);
+                    i++;
+                }
+                var processingTasks = tasks.Select(AwaitAndProcessAsync).ToList();
+                await Task.WhenAll(processingTasks);
 
-                shopXML.Add(shopTree);
+
+
+
             }
             catch (Exception e)
             {
                 await LogAsync(e.Message);
             }
         }
+        static async Task AwaitAndProcessAsync(Task<XDocument> task)
+        {
+            var result = await task;
+            
+            if (result != null)
+            {
+                //shopXML.Add(shopTree);
+                //await LogAsync("Task " + task.Result.Element(shop).Value + " added");
+                var xshop = result.Element(yml_catalog).Element(shop);
+                progress?.Report($"{xshop.Element(url).Value} добавлено {xshop.Element(offers).Elements().Count()} товаров");
+            }
 
-        public static async Task GetInfoShopAsync(string shopUrl, IProgress<string> progress)
+        }
+
+        public static void BuildOHBShopAsync()
+        {
+            try
+            {
+                //string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                //xOHBShop = new XElement(yml_catalog, new XAttribute(date, time_update),
+                //               new XElement(shop,
+                //                   new XElement(url, "http://onehomebeauty.com.ua")));
+                //xOHBShop.Element(shop).Add(xOHBCategories, new XElement(offers));
+                //XDocument xDoc = new XDocument(new XComment("YML file of OneHomeBeauty shop"), xOHBShop);
+            }
+            catch (Exception e)
+            {
+                //Report($"BuildOHBShop -  {e.Message}");
+            }
+        }
+
+        public static async Task GetInfoShopAsync(string shopUrl)
         {
             try
             {
@@ -262,27 +363,27 @@ namespace CoreOHB
 
                 progress.Report("Дата обновления - " + xCatalog.Element(yml_catalog).Attribute(date).Value);
             }
-            catch(XmlException e)
+            catch (XmlException e)
             {
                 await LogAsync(e.Message);
                 await LogAsync("Пробую обновить магазин...");
                 await UpdateOneHomeBeautyAsync();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 await LogAsync(e.Message);
             }
 
         }
 
-        public static async Task UpdateOneHomeBeautyAsync(IProgress<string> progress = null)
+        public static async Task UpdateOneHomeBeautyAsync(IProgress<string> _progress = null)
         {
-
+            progress = _progress;
             // Проверяем есть ли подключение к интернету
             if (InternetAvailable())
             {
                 ListShopXML = await LoadListShopsAsync();
-                await GetShopsAsync(progress);
+                await GetShopsAsync();
                 await SaveXml();
                 await UploadShopAsync();
             }
@@ -411,6 +512,43 @@ namespace CoreOHB
                 }
 
             }
+
+            public static string FolderOHB_Local { get; } = ApplicationData.Current.LocalFolder.Path + @"\";
+            public static string FolderOHB_Remote { get; } = @"http://onebeauty.com.ua/files/";
+            public static string FileOHB_Logfile { get; set; }
+            public static string FileOHB_Shop { get; } = "onehomebeauty.xml"; 
+            public static string FileOHB_ListShops { get; } = "shops-yml.xml";
+
+            public static async void SaveXmlAsync(string file, XElement xmlObject)
+            {
+                await Task.Run(async () =>
+                {
+                    try
+                    {
+                        using (StreamWriter sw = File.CreateText(file))
+                        {
+                            xmlObject.Save(sw);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        await LogAsync($"SaveXmlAsync - {e.Message}");
+                    }
+                });
+            }
+            public static void SaveXml(string file, XElement xEl, out FileInfo fileInfo)
+            {
+                if (string.IsNullOrEmpty(file))
+                {
+                    throw new ArgumentException("message", nameof(file));
+                }
+
+                using (StreamWriter sw = File.CreateText(file))
+                {
+                    xEl.Save(sw);
+                    fileInfo = new FileInfo(file);
+                }
+            }
         }
         public static class NetWork
         {
@@ -425,70 +563,16 @@ namespace CoreOHB
                         connectionProfile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
             }
 
-            /// <summary>
-            /// Загружает магазины в xml формате на диск
-            /// </summary>
-            /// <returns></returns>
-            public static async Task DownloadYML(IProgress<string> progress)
-            {
-                try
-                {
-                    //***************************************************************
-
-                    // получаем локальную папку
-                    StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-                    // создаем файл
-                    string file;
-                    StorageFile xmlFile;// = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
-                                        // запись в файл
-                    Uri uri;
-                    //загружаем магазины, которые в перечислены в файле
-                    Core.ListShopXML = await LoadListShopsAsync();
-                    foreach (XElement addresxml in Core.ListShopXML)
-                    {
-                        uri = new Uri(addresxml.Value);
-                        file = @"\DataFiles\" + uri.Host + ".xml";
-
-                        xmlFile = await localFolder.CreateFileAsync(file, CreationCollisionOption.ReplaceExisting);
-                        XDocument ymlCatalog = new XDocument();
-                        progress.Report("Загрузка - " + uri.ToString());
-                        using (var httpclient = new HttpClient())
-                        {
-                            var response = await httpclient.GetAsync(addresxml.Value);
-                            ymlCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
-                        }
-                        await FileIO.WriteTextAsync(xmlFile, ymlCatalog.ToString());
-                        FileInfo fi = new FileInfo(xmlFile.Path);
-                        progress.Report("Ок - " + fi.Length.FileSizeToString());
-                        await LogAsync(xmlFile.Name + " - " + fi.Length.FileSizeToString());
-
-                        //ymlCatalog.Save(tr);
-                    }
-                }
-                catch (XmlException xmlEx)
-                {
-                    progress.Report(xmlEx.Message);
-                    await LogAsync(xmlEx.Message);
-                    //MessageBox.Show(xmlEx.Message);
-                }
-                catch (Exception ex)
-                {
-                    progress.Report(ex.Message);
-                    await LogAsync(ex.Message);
-                    //MessageBox.Show(ex.Message);
-                }
-            }
-
             public static async Task<IEnumerable<XElement>> LoadListShopsAsync()
             {
                 XDocument result;
                 using (var httpclient = new HttpClient())
                 {
-                    var response = await httpclient.GetAsync(Core.UrlShopsXMLFile);
+                    var response = await httpclient.GetAsync(FolderOHB_Remote + FileOHB_ListShops);
                     result = XDocument.Load(await response.Content.ReadAsStreamAsync());
                 }
-                
-                return result.Element("shops-yml").Descendants(); 
+
+                return result.Element("shops-yml").Descendants();
             }
         }
     }
