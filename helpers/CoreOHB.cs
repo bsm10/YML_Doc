@@ -51,7 +51,10 @@ namespace CoreOHB //.OldCore
 
         private static TreeView tw;
 
-        private static StorageFile xmlFile; //сюда записывается итоговый файл магазина (на диске локально)
+        //private static StorageFile xmlFile //сюда записывается итоговый файл магазина (на диске локально)
+        //{
+        //    get; set;
+        //}
         static IProgress<string> progress = null;
 
 
@@ -71,65 +74,10 @@ namespace CoreOHB //.OldCore
                 {
                     await client.RenameAsync(FileOHB_Shop, newFileName);
                 }
-                await client.UploadFileAsync(xmlFile.Path, FileOHB_Shop);
-                if ((bool)localSettings.Values["showtoast"] == true)
-                {
-                    ShowToast("One Home Beauty", DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " - Updated onehomebeauty.xml");
-                }
-
-                await LogAsync("uploaded!");
+                await client.UploadFileAsync(FolderOHB_Local + FileOHB_Shop, FileOHB_Shop);
+                await LogAsync($"Uploaded {DateTime.Now.ToString("yyyy-MM-dd HH:mm")} onehomebeauty.xml");
             }
-            catch (Exception ex)
-            {
-                await LogAsync(ex.Message);
-            }
-            finally
-            {
-
-            }
-
-        }
-        //public static async Task UploadShopAsync(string fileName)
-        //{
-        //    try
-        //    {
-        //        string file = Path.GetFileName(fileName);
-        //        await LogAsync($"Uploading {file} to ftp..."); 
-        //        using (WebClient client = new WebClient())
-        //        {
-        //            client.Credentials = new NetworkCredential("granitmar1_ohbed", "Va3NeMHzyY");
-        //            byte[] responseArray = await client.UploadFileTaskAsync("ftp://ftp.s51.freehost.com.ua/" + file,
-        //                                                                    "STOR",
-        //                                                                    Path.Combine(Files.FolderOHB_Local, file));
-        //            await LogAsync(Encoding.Default.GetString(responseArray) == "" ? "Ok!" :
-        //                             Encoding.Default.GetString(responseArray));
-        //        }
-        //        //Report($"Ok!");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await LogAsync(ex.Message);
-        //    }
-        //}
-
-        private static async Task SaveXml()
-        {
-            try
-            {
-                // получаем локальную папку
-                StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-
-                using (StreamWriter sw = File.CreateText(localFolder.Path + file))
-                {
-                    shopTree.Save(sw);
-                }
-
-                xmlFile = await localFolder.GetFileAsync(file);
-
-                FileInfo fi = new FileInfo(xmlFile.Path);
-                await LogAsync(xmlFile.Name + " - " + fi.Length.FileSizeToString());
-            }
-            catch (Exception e)
+            catch(Exception e)
             {
                 await LogAsync(e.Message);
             }
@@ -164,12 +112,6 @@ namespace CoreOHB //.OldCore
                             var response = await httpclient.GetAsync(url_shop);
                             xYMLCatalog = XDocument.Load(await response.Content.ReadAsStreamAsync());
                         }
-
-                        //WebRequest request = WebRequest.Create(url_shop);
-                        //using (WebResponse response = await request.GetResponseAsync())
-                        //{
-                        //    xYMLCatalog = GetXDocFromStream(encoding, response.GetResponseStream());
-                        //}
                     }
 
                     //список категорий
@@ -190,6 +132,9 @@ namespace CoreOHB //.OldCore
 
                     XAttribute xCatalogAttribute = xYMLCatalog.Element(yml_catalog).Attribute(date);
                     DateTime lastUpdate = DateTime.Parse(xCatalogAttribute.Value);//дата последнего обновления
+                    var xshop = xYMLCatalog.Element(yml_catalog).Element(shop);
+                    progress?.Report($"{xshop.Element(url).Value} добавлено {ohbGoods.Count()} товаров");
+                    //await LogAsync($"{xshop.Element(url).Value} добавлено {ohbGoods.Count()} товаров");
                     return xYMLCatalog;
                 }
                 catch (XmlException xmlEx)
@@ -269,7 +214,6 @@ namespace CoreOHB //.OldCore
             }
             return null;
         }
-
         private static async Task GetShopsAsync()
         {
             try
@@ -296,7 +240,7 @@ namespace CoreOHB //.OldCore
                 int count = ListShopXML.Count();
                 Task<XDocument>[] tasks = new Task<XDocument>[count];
                 int i = 0;
-                foreach (XElement addresxml in ListShopXML) 
+                foreach (XElement addresxml in ListShopXML)
                 {
                     progress?.Report("Start loading " + addresxml.Value + "...");
                     tasks[i] = LoadShopAsync(addresxml.Value);
@@ -306,15 +250,25 @@ namespace CoreOHB //.OldCore
                 await Task.WhenAll(processingTasks);
 
 
-
+                // сохраняем на диск
+                StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+                //localFolder.
+                //await localFolder.CreateFileAsync(logFileName, CreationCollisionOption.ReplaceExisting);
+                using (StreamWriter sw = File.CreateText(FolderOHB_Local + FileOHB_Shop))
+                {
+                    shopTree.Save(sw);
+                }
+                FileInfo fi = new FileInfo(FolderOHB_Local + FileOHB_Shop);
+                long size = fi.Length / 1000;
+                await LogAsync($"{fi.Name} {size.ToString()}Mb {time_update}");
 
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 await LogAsync(e.Message);
             }
         }
-        static async Task AwaitAndProcessAsync(Task<XDocument> task)
+        private static async Task AwaitAndProcessAsync(Task<XDocument> task)
         {
             var result = await task;
             
@@ -323,26 +277,8 @@ namespace CoreOHB //.OldCore
                 //shopXML.Add(shopTree);
                 //await LogAsync("Task " + task.Result.Element(shop).Value + " added");
                 var xshop = result.Element(yml_catalog).Element(shop);
-                progress?.Report($"{xshop.Element(url).Value} добавлено {xshop.Element(offers).Elements().Count()} товаров");
             }
 
-        }
-
-        public static void BuildOHBShopAsync()
-        {
-            try
-            {
-                //string time_update = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-                //xOHBShop = new XElement(yml_catalog, new XAttribute(date, time_update),
-                //               new XElement(shop,
-                //                   new XElement(url, "http://onehomebeauty.com.ua")));
-                //xOHBShop.Element(shop).Add(xOHBCategories, new XElement(offers));
-                //XDocument xDoc = new XDocument(new XComment("YML file of OneHomeBeauty shop"), xOHBShop);
-            }
-            catch (Exception e)
-            {
-                //Report($"BuildOHBShop -  {e.Message}");
-            }
         }
 
         public static async Task GetInfoShopAsync(string shopUrl)
@@ -382,10 +318,17 @@ namespace CoreOHB //.OldCore
             // Проверяем есть ли подключение к интернету
             if (InternetAvailable())
             {
-                ListShopXML = await LoadListShopsAsync();
-                await GetShopsAsync();
-                await SaveXml();
-                await UploadShopAsync();
+                try
+                {
+                    ListShopXML = await LoadListShopsAsync();
+                    await GetShopsAsync();
+                    await UploadShopAsync();
+                    await LogAsync($"Обновлено успешно! {shopTree.Element(shop).Element(offers).Elements().Count()} товаров");
+                }
+                catch(Exception e)
+                {
+                    await LogAsync($"UpdateOneHomeBeautyAsync - {e.Message}");
+                }
             }
             else
             {
@@ -455,10 +398,15 @@ namespace CoreOHB //.OldCore
                     // получаем локальную папку
                     StorageFolder localFolder = ApplicationData.Current.LocalFolder;
                     string filePath = "update.log";
+                    FileInfo fileLog = new FileInfo(localFolder.Path + "/" + filePath);
+                    if (!fileLog.Exists)
+                    {
+                        await localFolder.CreateFileAsync(filePath);
+                    }
                     // получаем файл
                     StorageFile logFile = await localFolder.GetFileAsync(filePath);
-                    FileInfo fi = new FileInfo(logFile.Path);
-                    if (fi.Length < 1000)
+                    //FileInfo fi = new FileInfo(logFile.Path);
+                    if (filePath.Length < 1000) //fi
                     {
                         await FileIO.AppendTextAsync(logFile, DateTime.Now.ToString("yyyy-MM-dd HH:mm - ") + text + "\r\n");
                     }
@@ -476,6 +424,7 @@ namespace CoreOHB //.OldCore
 
                 }
             }
+
             public static async Task<string> GetLogFileTextAsync()
             {
                 try
@@ -518,7 +467,7 @@ namespace CoreOHB //.OldCore
             public static string FileOHB_Logfile { get; set; }
             public static string FileOHB_Shop { get; } = "onehomebeauty.xml"; 
             public static string FileOHB_ListShops { get; } = "shops-yml.xml";
-
+            
             public static async void SaveXmlAsync(string file, XElement xmlObject)
             {
                 await Task.Run(async () =>

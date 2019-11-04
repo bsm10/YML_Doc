@@ -118,33 +118,6 @@
         </PivotItem>
         <PivotItem Header="Shops">
             <!--<StackPanel d:DataContext="{d:DesignInstance Type=local:ViewModel, IsDesignTimeCreatable=True}">-->
-                <StackPanel d:DataContext="{StaticResource DesignData}">
-                
-                <!--<TextBlock x:Name="Name"
-                                       Height="90"
-                                       Text="{x:Bind Path=viewModel.YMLCatalog.date, Mode=OneWay}"/>-->
-                <TextBlock x:Name="Name"
-                           Height="50"
-                           FontSize="18"
-                           VerticalAlignment="Center" 
-                           HorizontalAlignment="Stretch"
-                           FontFamily="Trebuchet MS" 
-                           Text="{Binding YMLCatalog}"/>
-                <TextBlock x:Name="Date"
-                           Height="50"
-                           FontSize="18"
-                           DataContext="{Binding Path=YMLCatalog.shop}" 
-                           Text="{Binding Path=url}" />
-                
-                <Windows10version1803:TreeView x:Name="treeViewOHB"/>
-                    
-                <ListBox Height="250" 
-                         DataContext="{Binding Path=YMLCatalog.shop}"
-                         ItemsSource="{Binding Path=categories}"/>
-
-                    
-                                       
-            </StackPanel>
         </PivotItem>
         <PivotItem Header="Service"/>
     </Pivot>

@@ -46,11 +46,10 @@ namespace YML_Doc
             try
             {
                 await UpdateOneHomeBeautyAsync(progress);
-                await GetInfoShopAsync(FolderOHB_Remote + FileOHB_Shop);
             }
             catch (Exception exc)
             {
-                ShowToast("GetInfoShopAsync", exc.Message);
+                ShowToast("BtnUpdate_Tapped", exc.Message);
             }
         }
 
@@ -144,37 +143,12 @@ namespace YML_Doc
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            TreeViewNode rootNode = new TreeViewNode() { Content = "Flavors" };
-            rootNode.IsExpanded = true;
-            rootNode.Children.Add(new TreeViewNode() { Content = "Vanilla" });
-            rootNode.Children.Add(new TreeViewNode() { Content = "Strawberry" });
-            rootNode.Children.Add(new TreeViewNode() { Content = "Chocolate" });
-
-            treeViewOHB.RootNodes.Add(rootNode);
-
-            if (InternetAvailable())
-            {
-                try
-                {
-                    //await DownloadYML(progress);
-                    await UpdateOneHomeBeautyAsync(progress);
-                    await CreateLogFileAsync();
-                    await GetInfoShopAsync(FolderOHB_Remote + FileOHB_Shop);
-                }
-                catch (Exception exc)
-                {
-                    ShowToast("Page_Loaded", exc.Message);
-                }
-            }
-            else
-            {
-                ShowToast(Application.Current.ToString(), "Нет интернета! Обновления не будет!");
-            }
         }
 
-        private void BtnClear_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        private async void BtnClear_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             txtStatus.Text = "";
+            await LogFile.DeleteAsync();
         }
 
         private void SetBackgroundTask(double minutes)
