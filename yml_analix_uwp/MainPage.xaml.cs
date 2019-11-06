@@ -45,7 +45,7 @@ namespace YML_Doc
         {
             try
             {
-                await UpdateOneHomeBeautyAsync(progress);
+                await UpdateOneHomeBeautyAsync();
             }
             catch (Exception exc)
             {
@@ -58,14 +58,12 @@ namespace YML_Doc
         {
             try
             {
-                if(InternetAvailable())await GetInfoShopAsync(FolderOHB_Remote + FileOHB_Shop);
+                if(InternetAvailable())await GetInfoShopAsync(FolderOHB_Remote + FileOHB_Shop, progress);
             }
             catch (Exception exc)
             {
                 ShowToast("BtnGetInfo_Tapped", exc.Message);
             }
-
-            
         }
 
         private void TimePiker_TimeChanged(object sender, TimePickerValueChangedEventArgs e)
@@ -141,7 +139,7 @@ namespace YML_Doc
             return null;
         }
 
-        private async void Page_Loaded(object sender, RoutedEventArgs e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
         }
 
@@ -165,7 +163,7 @@ namespace YML_Doc
 
         private async void BtnLog_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            txtStatus.Text += await GetLogFileTextAsync();
+            txtStatus.Text = await GetLogFileTextAsync();
            // GetLogAsync();
         }
 

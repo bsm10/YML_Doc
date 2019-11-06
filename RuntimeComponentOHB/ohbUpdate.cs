@@ -1,5 +1,7 @@
 ﻿
 using Windows.ApplicationModel.Background;
+using static CoreOHB.Core;
+using static CoreOHB.Helpers.Files;
 
 namespace RuntimeComponentOHB
 {
@@ -11,10 +13,11 @@ namespace RuntimeComponentOHB
             _deferral = taskInstance.GetDeferral();
             try
             {
-                await CoreOHB.Core.UpdateOneHomeBeautyAsync();
+                await UpdateOneHomeBeautyAsync();
             }
             finally
             {
+                await LogAsync($"{this.ToString()} complete!");
                 _deferral.Complete();
             }
         }
